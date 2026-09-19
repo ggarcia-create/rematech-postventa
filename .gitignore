@@ -1,0 +1,13 @@
+node_modules/
+dist/
+src-tauri/target/
+test-results/
+playwright-report/
+.DS_Store
+.env*
+
+src-tauri/tauri.cloud.conf.json
+supabase/.temp/
+
+entrega/
+*.log

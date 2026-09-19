@@ -1,0 +1,677 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#15191B" />
+    <title>Rematech Postventa</title>
+  </head>
+  <body>
+    <section id="login-screen" class="login-screen">
+      <div class="login-panel">
+        <form id="login-form">
+          <div class="login-wordmark">rematech<span>●</span></div>
+          <div class="eyebrow">POSTVENTA</div>
+          <h2 id="login-title">Iniciar sesión</h2>
+          <p id="login-description">Ingresa con tu cuenta de trabajo.</p>
+          <label id="setup-name-label" hidden
+            >Nombre del administrador<input
+              id="login-name"
+              autocomplete="name"
+              maxlength="120" /></label
+          ><label
+            >Correo electrónico<input
+              type="email"
+              id="login-email"
+              autocomplete="username"
+              required
+              maxlength="254"
+              placeholder="nombre@rematech.mx" /></label
+          ><label
+            >Contraseña<input
+              type="password"
+              id="login-password"
+              autocomplete="current-password"
+              required
+          /></label>
+          <p id="login-error" role="alert"></p>
+          <button id="login-submit" class="primary" type="submit" disabled>
+            Iniciar sesión
+          </button>
+          <button id="open-recovery" type="button" class="recovery-link" hidden>
+            Olvidé mi contraseña
+          </button>
+          <p id="account-guidance" hidden>
+            Hay cuentas registradas en este equipo.
+          </p>
+        </form>
+      </div>
+    </section>
+    <dialog id="notifications-dialog" aria-labelledby="notifications-title">
+      <div class="case-dialog-heading">
+        <div>
+          <div class="eyebrow">AVISOS DE TU ÁREA</div>
+          <h2 id="notifications-title">Notificaciones</h2>
+        </div>
+        <button id="close-notifications">Cerrar</button>
+      </div>
+      <p class="help">
+        Al abrir un aviso se marcará como leído para tu cuenta.
+      </p>
+      <div id="notifications-list"></div>
+      <p id="notifications-error" role="status"></p>
+    </dialog>
+    <dialog id="recovery-dialog" aria-labelledby="recovery-title">
+      <form id="recovery-form">
+        <div class="eyebrow">RECUPERACIÓN DE ACCESO LOCAL</div>
+        <h2 id="recovery-title">Restablecer contraseña</h2>
+        <p>
+          Usa el código de un solo uso preparado por el administrador de esta
+          computadora. Tus expedientes y usuarios se conservarán. No se enviará
+          ningún correo.
+        </p>
+        <label
+          >Correo de la cuenta<input
+            id="recovery-email"
+            type="email"
+            autocomplete="username"
+            required
+        /></label>
+        <label
+          >Código de recuperación<input
+            id="recovery-code"
+            autocomplete="off"
+            required
+            spellcheck="false"
+        /></label>
+        <label
+          >Nueva contraseña<input
+            id="recovery-password"
+            type="password"
+            autocomplete="new-password"
+            minlength="10"
+            required
+        /></label>
+        <label
+          >Confirmar nueva contraseña<input
+            id="recovery-confirmation"
+            type="password"
+            autocomplete="new-password"
+            minlength="10"
+            required
+        /></label>
+        <p class="help">
+          Mínimo 10 caracteres. Escribe la nueva contraseña aquí; no necesitas
+          compartirla con soporte.
+        </p>
+        <p id="recovery-message" role="alert"></p>
+        <div class="modal-actions">
+          <button id="cancel-recovery" type="button">Cancelar</button
+          ><button id="submit-recovery" type="submit" class="primary">
+            Guardar nueva contraseña
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <div id="application" hidden>
+      <header class="topbar">
+        <div class="brand">
+          <span class="brand-symbol">R<span>↗</span></span>
+          <div>REMATECH <span class="brand-sub">POSTVENTA</span></div>
+        </div>
+        <div class="top-status">
+          <button id="open-notifications" class="notification-trigger">
+            Notificaciones <span id="notification-count">0</span></button
+          ><span id="mode-label">MODO DEMO</span><span class="status-dot"></span
+          ><span id="save-status" role="status">Almacenamiento local</span>
+        </div>
+      </header>
+      <div class="app-body">
+        <nav class="sidebar" aria-label="Navegación principal">
+          <button
+            id="sidebar-toggle"
+            aria-label="Expandir menú"
+            aria-expanded="false"
+            title="Expandir o contraer menú"
+          >
+            <span aria-hidden="true"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 6h16M4 12h16M4 18h16" /></svg></span
+            ><b class="nav-label">Menú principal</b>
+          </button>
+          <div class="sidebar-caption">ESPACIO DE TRABAJO</div>
+          <button data-route="dashboard">
+            <span aria-hidden="true"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                <rect x="14" y="14" width="7" height="7" rx="1.5" /></svg></span
+            ><b class="nav-label">Dashboard</b></button
+          ><button data-route="ingresos">
+            <span aria-hidden="true"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 3v12m-4-4 4 4 4-4M5 14v6h14v-6" /></svg></span
+            ><b class="nav-label">Ingresos</b></button
+          ><button data-route="recepciones">
+            <span aria-hidden="true"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 7h7l2 2h9v11H3zM3 7V4h7l2 3" /></svg></span
+            ><b class="nav-label">Consulta y recepciones</b></button
+          ><button data-route="calidad">
+            <span aria-hidden="true"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.7"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path
+                  d="m12 3 8 3v6c0 5-8 9-8 9s-8-4-8-9V6zM8 12l3 3 5-6"
+                /></svg></span
+            ><b class="nav-label">Calidad</b>
+          </button>
+          <div class="sidebar-bottom">
+            <div id="session-user"></div>
+            <button
+              id="manage-users"
+              aria-label="Configuración"
+              title="Configuración"
+              hidden
+            >
+              <span aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path
+                    d="m9 3-1 3-3 1v3l-2 2 2 2v3l3 1 1 3h6l1-3 3-1v-3l2-2-2-2V7l-3-1-1-3z"
+                  />
+                  <circle cx="12" cy="12" r="3" /></svg></span
+              ><b class="nav-label">Configuración</b></button
+            ><button
+              id="logout"
+              aria-label="Cerrar sesión"
+              title="Cerrar sesión"
+            >
+              <span aria-hidden="true"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M10 4H4v16h6m4-12 4 4-4 4M8 12h12" /></svg></span
+              ><b class="nav-label">Cerrar sesión</b></button
+            ><small>ALMACENAMIENTO LOCAL</small>
+          </div>
+        </nav>
+        <main class="view-area">
+          <section
+            id="view-dashboard"
+            data-view="dashboard"
+            class="module-view"
+            hidden
+          >
+            <div class="eyebrow">REMATECH POSTVENTA</div>
+            <h1>Dashboard</h1>
+            <div class="empty-state">
+              <div class="empty-icon">▦</div>
+              <h2>Dashboard</h2>
+              <p>Esta sección queda reservada para una próxima etapa.</p>
+            </div>
+          </section>
+          <section
+            id="view-ingresos"
+            data-view="ingresos"
+            class="workspace"
+            hidden
+          >
+            <aside class="capture">
+              <div class="panel-heading">
+                <div class="eyebrow">SERVICIO POSTVENTA · REMATECH</div>
+                <h1>Nuevo ingreso</h1>
+                <p>
+                  Captura los datos del equipo. Revisa sus documentos y registra
+                  el expediente.
+                </p>
+                <div class="intake-shortcuts">
+                  <a href="#intake-form">01 · Capturar ingreso</a
+                  ><a href="#intake-documents">02 · Visualizar documentos ↓</a>
+                </div>
+              </div>
+              <form id="intake-form" novalidate>
+                <section class="form-section">
+                  <h2><span>01</span> Datos del ingreso</h2>
+                  <div class="fields">
+                    <label class="full"
+                      >Folio
+                      <div class="input-action">
+                        <input name="folio" id="folio" maxlength="60" /><button
+                          type="button"
+                          id="generate-folio"
+                          title="Generar nuevo folio"
+                        >
+                          ↻ Generar
+                        </button>
+                      </div></label
+                    ><label
+                      >Fecha<input type="date" name="date" id="date" /></label
+                    ><label
+                      >Canal de origen<select name="origin" id="origin">
+                        <option>Mercado Libre</option>
+                        <option>Rematech.mx</option>
+                        <option>Jilotepec</option>
+                        <option>Xonacatlán</option>
+                        <option>Atlacomulco</option>
+                        <option>Otro</option>
+                      </select></label
+                    ><label class="full"
+                      >Tipo de ingreso<select
+                        name="intakeType"
+                        id="intake-type"
+                      >
+                        <option>Servicio</option>
+                        <option>Cambio</option>
+                        <option>Devolución</option>
+                      </select></label
+                    ><label class="full"
+                      >Responsable<input
+                        name="responsible"
+                        id="responsible"
+                        maxlength="120"
+                        placeholder="Nombre de quien recibe"
+                    /></label>
+                  </div>
+                </section>
+                <section class="form-section">
+                  <h2><span>02</span> Cliente y equipo</h2>
+                  <div class="fields">
+                    <label class="full"
+                      >Nombre del cliente <b>*</b
+                      ><input
+                        name="client"
+                        id="client"
+                        maxlength="160"
+                        placeholder="Nombre completo" /></label
+                    ><label
+                      >Número de pedido<input
+                        name="order"
+                        id="order"
+                        maxlength="100"
+                        placeholder="Ej. 200001234567" /></label
+                    ><label
+                      >Número de serie / SN<input
+                        name="serial"
+                        id="serial"
+                        maxlength="100"
+                        placeholder="Serie del equipo" /></label
+                    ><label class="full"
+                      >Equipo <b>*</b
+                      ><input
+                        name="equipment"
+                        id="equipment"
+                        maxlength="180"
+                        placeholder="Marca, modelo y características"
+                    /></label>
+                  </div>
+                </section>
+                <section class="form-section">
+                  <h2><span>03</span> Reporte del cliente</h2>
+                  <label
+                    >Motivo de reclamo<select id="reason" name="reason">
+                      <option>No funciona</option>
+                      <option>Dañado</option>
+                      <option>Producto diferente</option>
+                      <option>Incompleto</option>
+                      <option>Arrepentimiento</option>
+                    </select></label
+                  ><label class="description-label"
+                    >Motivo específico <b>*</b
+                    ><textarea
+                      name="description"
+                      id="description"
+                      maxlength="1500"
+                      rows="4"
+                      placeholder="Describe la falla tal como la reporta el cliente…"
+                    ></textarea>
+                  </label>
+                  <div class="field-foot">
+                    <span>Conserva el reporte original del cliente.</span
+                    ><span id="character-count">0 / 1500</span>
+                  </div>
+                </section>
+                <section class="form-section">
+                  <h2>
+                    <span>04</span> Clasificación técnica <small>MANUAL</small>
+                  </h2>
+                  <p class="help">
+                    Selecciona un componente y todas sus fallas relacionadas.
+                  </p>
+                  <div id="components"></div>
+                  <button
+                    type="button"
+                    class="add-component"
+                    id="add-component"
+                  >
+                    + Agregar componente
+                  </button>
+                  <details class="request-options">
+                    <summary>Solicitud al área técnica</summary>
+                    <div id="requests"></div>
+                  </details>
+                </section>
+                <section class="form-section">
+                  <h2>
+                    <span>05</span> Evidencias del cliente <small>MÁX. 2</small>
+                  </h2>
+                  <div class="evidence-grid" id="evidence"></div>
+                  <p class="help">
+                    Solo se incluyen en la requisición. Compresión automática.
+                  </p>
+                </section>
+              </form>
+              <footer class="capture-actions">
+                <button id="register-intake" class="primary register-intake">
+                  <span>REGISTRAR INGRESO</span
+                  ><small
+                    >Guardar expediente y enviar a la bandeja de
+                    Reparación</small
+                  >
+                </button>
+                <button id="send-ticket" class="primary">
+                  <span>↗ &nbsp; ENVIAR TICKET</span
+                  ><small>Al correo del cliente</small></button
+                ><button id="send-repair" class="secondary">
+                  <span>↗ &nbsp; ENVIAR REQUISICIÓN</span
+                  ><small>Al área de Reparación</small>
+                </button>
+              </footer>
+            </aside>
+            <section class="documents" id="intake-documents">
+              <div class="document-heading">
+                <div>
+                  <div class="eyebrow">DOCUMENTOS</div>
+                  <h2>Visualiza antes de entregar.</h2>
+                </div>
+                <span class="live-badge">● Vista previa en vivo</span>
+              </div>
+              <div class="document-toolbar">
+                <div role="tablist" aria-label="Documento">
+                  <button
+                    id="tab-ticket"
+                    role="tab"
+                    aria-selected="true"
+                    class="tab active"
+                  >
+                    Ticket cliente</button
+                  ><button
+                    id="tab-repair"
+                    role="tab"
+                    aria-selected="false"
+                    class="tab"
+                  >
+                    Requisición de Reparación
+                  </button>
+                </div>
+                <div class="tools">
+                  <button id="clear">Nuevo ingreso</button
+                  ><button id="print">Imprimir</button
+                  ><button id="pdf" class="pdf-button">↓ PDF</button>
+                </div>
+              </div>
+              <div class="preview-meta">
+                <span id="preview-label">COMPROBANTE DE SERVICIO</span
+                ><label id="size-control"
+                  >Tamaño
+                  <select id="ticket-width">
+                    <option value="80">80 mm</option>
+                    <option value="58">58 mm</option>
+                  </select></label
+                >
+              </div>
+              <div
+                id="preview"
+                class="preview"
+                aria-label="Vista previa del documento"
+              ></div>
+              <div class="preview-footer">
+                REMATECH MÉXICO <span>•</span> Gestión de servicio postventa
+              </div>
+            </section>
+          </section>
+          <section
+            id="view-recepciones"
+            data-view="recepciones"
+            class="module-view"
+            hidden
+          >
+            <div class="module-header">
+              <div>
+                <div class="eyebrow">ÁREA DE REPARACIÓN</div>
+                <h1>Consulta y recepciones</h1>
+                <p>
+                  Recibe equipos, consulta el expediente y registra el trabajo
+                  técnico.
+                </p>
+              </div>
+              <button class="refresh-cases">↻ Actualizar</button>
+            </div>
+            <div class="search-toolbar">
+              <label
+                >Buscar por folio, pedido o S/N<input
+                  id="repair-search"
+                  type="search"
+                  placeholder="Escribe un folio, número de pedido o serie…" /></label
+              ><label
+                >Estado<select id="repair-filter">
+                  <option value="">Todos los estados</option>
+                  <option value="pendiente">Pendiente de recepción</option>
+                  <option value="reparacion">En reparación</option>
+                  <option value="administracion">
+                    En seguimiento con Administración
+                  </option>
+                  <option value="calidad">Enviado a Calidad</option>
+                  <option value="finalizado">Proceso finalizado</option>
+                </select></label
+              >
+            </div>
+            <div id="repair-list" class="case-list" aria-live="polite"></div>
+          </section>
+          <section
+            id="view-calidad"
+            data-view="calidad"
+            class="module-view"
+            hidden
+          >
+            <div class="module-header">
+              <div>
+                <div class="eyebrow">CONTROL DE CALIDAD</div>
+                <h1>Calidad</h1>
+                <p>
+                  Revisa los equipos enviados por Reparación y finaliza su
+                  proceso.
+                </p>
+              </div>
+              <button class="refresh-cases">↻ Actualizar</button>
+            </div>
+            <div class="search-toolbar">
+              <label
+                >Buscar por folio, pedido o S/N<input
+                  id="quality-search"
+                  type="search"
+                  placeholder="Buscar en la bandeja de Calidad…" /></label
+              ><label
+                >Estado<select id="quality-filter">
+                  <option value="calidad">Pendientes de Calidad</option>
+                  <option value="finalizado">Procesos finalizados</option>
+                  <option value="">Todos</option>
+                </select></label
+              >
+            </div>
+            <div id="quality-list" class="case-list" aria-live="polite"></div>
+          </section>
+        </main>
+      </div>
+    </div>
+    <dialog id="case-dialog" class="case-dialog" aria-labelledby="case-title">
+      <div class="case-dialog-heading">
+        <div>
+          <div class="eyebrow">EXPEDIENTE DE SERVICIO</div>
+          <h2 id="case-title"></h2>
+        </div>
+        <button id="close-case" aria-label="Cerrar expediente">Cerrar</button>
+      </div>
+      <div id="case-detail"></div>
+      <p id="case-message" role="status" aria-live="polite"></p>
+    </dialog>
+    <dialog id="users-dialog" aria-labelledby="users-title">
+      <div class="eyebrow">ADMINISTRACIÓN</div>
+      <h2 id="users-title">Configuración</h2>
+      <p class="settings-intro">Usuarios y permisos</p>
+      <div id="users-list"></div>
+      <form id="user-form">
+        <h3>Agregar usuario</h3>
+        <label>Nombre<input name="name" required maxlength="120" /></label
+        ><label>Correo<input name="email" type="email" required /></label
+        ><label
+          >Área<select name="role">
+            <option value="ingresos">Ingresos</option>
+            <option value="reparacion">Reparación</option>
+            <option value="calidad">Calidad</option>
+            <option value="admin">Administrador</option>
+          </select></label
+        ><label
+          >Contraseña temporal<input
+            name="password"
+            type="password"
+            minlength="10"
+            required
+            autocomplete="new-password"
+        /></label>
+        <p class="help">
+          El usuario deberá cambiar su contraseña al entrar por primera vez.
+          Mínimo 10 caracteres.
+        </p>
+        <p id="user-message" role="status"></p>
+        <div class="modal-actions">
+          <button type="button" id="close-users">Cerrar</button
+          ><button type="submit" class="primary">Crear usuario</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="reset-user-dialog" aria-labelledby="reset-user-title">
+      <form id="reset-user-form">
+        <h2 id="reset-user-title">Restablecer contraseña</h2>
+        <p>
+          Comparte la contraseña temporal directamente con el usuario. Tendrá
+          que cambiarla al entrar.
+        </p>
+        <label
+          >Contraseña temporal<input
+            id="reset-user-password"
+            type="password"
+            autocomplete="new-password"
+            minlength="10"
+            required
+        /></label>
+        <p id="reset-user-error" role="alert"></p>
+        <div class="modal-actions">
+          <button type="button" id="cancel-reset-user">Cancelar</button
+          ><button type="submit" class="primary">Restablecer</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="password-change-dialog" aria-labelledby="password-change-title">
+      <form id="password-change-form">
+        <div class="eyebrow">PRIMER ACCESO</div>
+        <h2 id="password-change-title">Crea tu contraseña</h2>
+        <p>Reemplaza la contraseña temporal para entrar a tu cuenta.</p>
+        <label
+          >Nueva contraseña<input
+            id="new-account-password"
+            type="password"
+            autocomplete="new-password"
+            minlength="10"
+            required
+        /></label>
+        <label
+          >Confirmar contraseña<input
+            id="confirm-account-password"
+            type="password"
+            autocomplete="new-password"
+            minlength="10"
+            required
+        /></label>
+        <p id="password-change-error" role="alert"></p>
+        <div class="modal-actions">
+          <button id="cancel-password-change" type="button">Cancelar</button
+          ><button type="submit" class="primary">Guardar y entrar</button>
+        </div>
+      </form>
+    </dialog>
+    <div id="notification" role="status" aria-live="polite" hidden></div>
+    <dialog id="send-dialog" aria-labelledby="modal-title">
+      <form id="send-form">
+        <div class="eyebrow">DOCUMENTOS REMATECH</div>
+        <h2 id="modal-title"></h2>
+        <div id="modal-content"></div>
+        <div id="send-status" role="status" aria-live="polite"></div>
+        <div class="modal-actions">
+          <button type="button" id="cancel-send">Cancelar</button
+          ><button type="submit" class="primary" id="confirm-send">
+            Enviar
+          </button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="clear-dialog" aria-labelledby="clear-title">
+      <h2 id="clear-title">¿Iniciar una nueva recepción?</h2>
+      <p>
+        Se eliminarán la captura actual y sus dos evidencias. Guarda los
+        documentos que necesites antes de continuar.
+      </p>
+      <div class="modal-actions">
+        <button id="cancel-clear">Cancelar</button
+        ><button id="confirm-clear" class="primary">Limpiar captura</button>
+      </div>
+    </dialog>
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

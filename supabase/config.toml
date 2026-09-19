@@ -1,0 +1,4 @@
+project_id = "rematech-postventa"
+[functions.rematech]
+verify_jwt = false
+# The function explicitly validates every bearer token with auth.getUser().

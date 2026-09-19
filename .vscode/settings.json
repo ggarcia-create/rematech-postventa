@@ -1,0 +1,5 @@
+{
+  "editor.tabSize": 2,
+  "files.exclude": { "**/target": true, "**/node_modules": true },
+  "rust-analyzer.linkedProjects": ["src-tauri/Cargo.toml"]
+}

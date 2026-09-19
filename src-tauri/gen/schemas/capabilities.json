@@ -1,0 +1,1 @@
+{"main-capability":{"identifier":"main-capability","description":"Guardar un PDF elegido por el usuario; sin shell ni acceso general a archivos.","local":true,"windows":["main"],"permissions":["dialog:allow-save","fs:allow-write-file"]}}
