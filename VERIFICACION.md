@@ -12,7 +12,7 @@
 - Las cuentas y expedientes de prueba se eliminaron al finalizar cada prueba. No se modificaron expedientes reales.
 - Escaneo del repositorio: ninguna clave privada del proyecto incluida; archivos .env y carpeta entrega ignorados.
 
-Los instaladores finales se verifican adicionalmente mediante el workflow de GitHub: instalación silenciosa y proceso de Windows, y presencia de ambas arquitecturas en Mac. El correo desde rematech.mx sigue pendiente de configuración del proveedor y DNS; no se afirma haber enviado correos. No se cuenta con firma comercial/notarización.
+Instaladores finales: el job Windows del run 35448955404 pasó instalación silenciosa y arranque del ejecutable instalado. El job Mac compiló, pero su comprobación lipo tenía sintaxis incorrecta; se corrigió. El DMG final de Mac se recompiló localmente, se verificaron arm64 y x86_64 por separado, la firma ad hoc con codesign y la integridad del DMG con hdiutil. La aplicación nativa abrió su pantalla de inicio de sesión. El código de aplicación coincide en ambos paquetes; solo cambia el empaquetado de cada sistema. El correo desde rematech.mx sigue pendiente de configuración del proveedor y DNS; no se afirma haber enviado correos. No se cuenta con firma comercial/notarización.
 
 ---
 
