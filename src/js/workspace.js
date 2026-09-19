@@ -3,7 +3,7 @@ import { notify, dismissNotice } from "./notice.js";
 import { caseDetailHTML, updateCaseControls } from "./case-view.js";
 import "../styles/workflow.css";
 import { auth } from "./auth.js";
-import { cases } from "./case-storage.js";
+import { cases, localCases } from "./case-storage.js";
 import { can, ROLES, STATUSES, matchesCase } from "./workflow.js";
 import { escapeHTML as e, displayDate } from "./utils.js";
 import { generatePDF, savePDF } from "./pdf.js";
@@ -324,6 +324,7 @@ async function refreshNotifications() {
   }
 }
 async function showUsers() {
+  $("#open-local-import").hidden = !CLOUD_MODE;
   const list = await auth.users();
   $("#users-list").innerHTML = list
     .map(
@@ -507,6 +508,50 @@ export async function initializeWorkspace(source) {
     } catch (error) {
       notify(error.message, true);
     }
+  });
+  $("#open-local-import").addEventListener("click", async () => {
+    try {
+      const local = await localCases.list();
+      $("#local-import-message").textContent =
+        `${local.length} expedientes en esta computadora. Se copiarán al espacio compartido; los originales se conservan y no se reemplazan expedientes existentes.`;
+      $("#confirm-local-import").disabled = local.length === 0;
+      $("#local-import-dialog").showModal();
+    } catch (error) {
+      errorText("#user-message", error);
+    }
+  });
+  $("#cancel-local-import").addEventListener("click", () =>
+    $("#local-import-dialog").close(),
+  );
+  $("#local-import-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = event.submitter;
+    button.disabled = true;
+    $("#cancel-local-import").disabled = true;
+    let transferred = 0,
+      skipped = 0;
+    try {
+      const local = await localCases.list();
+      for (const record of local) {
+        $("#local-import-message").textContent =
+          `Transfiriendo ${transferred + skipped + 1} de ${local.length}…`;
+        const result = await cases.importLocal(record);
+        if (result.skipped) skipped++;
+        else transferred++;
+      }
+      $("#local-import-message").textContent =
+        `${transferred} transferidos; ${skipped} ya estaban en el espacio compartido. La copia local se conserva.`;
+      await refresh();
+    } catch (error) {
+      $("#local-import-message").textContent =
+        `${transferred} transferidos. ${error.message} Puedes volver a intentar; no se duplicarán los ya transferidos.`;
+      button.disabled = false;
+    } finally {
+      $("#cancel-local-import").disabled = false;
+    }
+  });
+  $("#local-import-dialog").addEventListener("cancel", (event) => {
+    if ($("#cancel-local-import").disabled) event.preventDefault();
   });
   $("#users-list").addEventListener("click", (event) => {
     const button = event.target.closest("[data-reset-user]");

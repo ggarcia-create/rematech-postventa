@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.116.0';
-import { createCase, applyAction, ROLES, normalizeRecord } from './shared/workflow.js';
+import { createCase, applyAction, ROLES, STATUSES, normalizeRecord } from './shared/workflow.js';
 const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type','Content-Type':'application/json'};
 const answer=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers});
 const check=(result:any)=>{if(result.error)throw new Error(result.error.code==='23505'?'Este folio o correo ya está registrado.':result.error.message);return result.data;};
@@ -59,9 +59,19 @@ Deno.serve(async request=>{
    const read=check(await db.from('rematech_notification_reads').select('notification_id').eq('user_id',user.id));const ids=new Set(read.map((r:any)=>r.notification_id));
    return answer(rows.flatMap((r:any)=>(r.body.notifications||[]).filter((n:any)=>n.targets.includes(user.role)).map((n:any)=>({...n,caseId:r.id,folio:r.body.intake.folio,unread:!ids.has(n.id)}))).sort((a:any,b:any)=>b.at.localeCompare(a.at)));
   }
-  if(input.action==='register'){
+  if(input.action==='register'||input.action==='import-local'){
    const files=input.evidence||[];if(files.length>2)throw new Error('Máximo dos evidencias.');
-   const record:any=createCase(input.intake,[],user);const paths:string[]=[];
+   let record:any;
+   if(input.action==='import-local'){
+    admin();const source=input.record;
+    if(!source||! /^[0-9a-f-]{36}$/i.test(source.id)||!Object.hasOwn(STATUSES,source.status)||!Array.isArray(source.history))throw new Error('Expediente local no válido.');
+    const valid=createCase(source.intake,[],user);
+    const existing=check(await db.from('rematech_cases').select('id').eq('id',source.id).maybeSingle());
+    if(existing)return answer({skipped:true});
+    record={...normalizeRecord(source),id:source.id,folioKey:valid.folioKey,revision:1,evidence:[],updatedAt:new Date().toISOString()};
+    record.history.push({id:crypto.randomUUID(),at:record.updatedAt,actorId:user.id,actor:user.name,role:user.role,action:'Transferido del archivo local',status:record.status});
+   }else record=createCase(input.intake,[],user);
+   const paths:string[]=[];
    try{
     for(let i=0;i<files.length;i++){
      if(!files[i]){record.evidence.push(null);continue;}
@@ -69,7 +79,7 @@ Deno.serve(async request=>{
      const bytes=Uint8Array.from(atob(base64),c=>c.charCodeAt(0));const path=`${record.id}/${i}`;
      check(await db.storage.from('rematech-evidence').upload(path,bytes,{contentType:type}));paths.push(path);record.evidence.push(path);
     }
-    record.notifications.push({id:crypto.randomUUID(),at:new Date().toISOString(),actor:user.name,actorId:user.id,role:user.role,action:'Nuevo ingreso pendiente de recepción',status:record.status,targets:['reparacion'],readBy:[]});
+    if(input.action==='register')record.notifications.push({id:crypto.randomUUID(),at:new Date().toISOString(),actor:user.name,actorId:user.id,role:user.role,action:'Nuevo ingreso pendiente de recepción',status:record.status,targets:['reparacion'],readBy:[]});
     check(await db.rpc('rematech_save_case',{p_id:record.id,p_revision:null,p_body:record}));return answer({...record,evidence:[]});
    }catch(error){if(paths.length)await db.storage.from('rematech-evidence').remove(paths);throw error;}
   }

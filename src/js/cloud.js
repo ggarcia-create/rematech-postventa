@@ -108,6 +108,12 @@ async function getCase(id) {
 }
 export const cloudCases = {
   list: () => cloudCall("list"),
+  async importLocal(record) {
+    return cloudCall("import-local", {
+      record: { ...record, evidence: [] },
+      evidence: await Promise.all(record.evidence.map(imageData)),
+    });
+  },
   get: getCase,
   async register(intake, evidence) {
     return cloudCall("register", {

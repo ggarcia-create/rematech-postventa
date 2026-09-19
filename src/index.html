@@ -566,6 +566,9 @@
       <h2 id="users-title">Configuración</h2>
       <p class="settings-intro">Usuarios y permisos</p>
       <div id="users-list"></div>
+      <button id="open-local-import" type="button" hidden>
+        Transferir expedientes locales
+      </button>
       <form id="user-form">
         <h3>Agregar usuario</h3>
         <label>Nombre<input name="name" required maxlength="120" /></label
@@ -593,6 +596,18 @@
         <div class="modal-actions">
           <button type="button" id="close-users">Cerrar</button
           ><button type="submit" class="primary">Crear usuario</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="local-import-dialog" aria-labelledby="local-import-title">
+      <form id="local-import-form">
+        <h2 id="local-import-title">Transferir expedientes locales</h2>
+        <p id="local-import-message" role="status"></p>
+        <div class="modal-actions">
+          <button type="button" id="cancel-local-import">Cerrar</button
+          ><button type="submit" class="primary" id="confirm-local-import">
+            Transferir al espacio compartido
+          </button>
         </div>
       </form>
     </dialog>

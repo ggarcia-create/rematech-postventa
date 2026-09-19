@@ -17,6 +17,8 @@ try{
  assert.equal((await call(quality,'list')).status,403);
  assert((await call(quality,'change-password',{password:'Changed-'+pass,confirmation:'Changed-'+pass})).ok);
  const renewed=await request('/auth/v1/token?grant_type=password',{email:quality.email,password:'Changed-'+pass},{apikey:anon,'Content-Type':'application/json'});assert(renewed.ok);quality.token=renewed.data.access_token;
+ assert(!(await call(repair,'reset-user-password',{id:quality.id,password:'Reset-'+pass})).ok);
+ assert((await call(admin,'profile')).data.emailEnabled===false);
  const {newDraft}=await import('../src/js/utils.js');
  const d={...newDraft(),client:'QA temporal',equipment:'Equipo QA',serial:'QA-SN',description:'Prueba de flujo',components:[{component:'Batería / Carga',faults:['No carga'],other:''}]};
  assert(!(await call(repair,'register',{intake:d,evidence:[]})).ok);
@@ -24,13 +26,25 @@ try{
  assert((await call(repair,'list')).data.some(x=>x.id===r.id));
  assert((await call(repair,'notifications')).data.some(x=>x.caseId===r.id));
  const act=async(user,operation,payload={})=>{const res=await call(user,'act',{id:r.id,revision:r.revision,operation,payload});assert(res.ok,JSON.stringify(res.data));r=res.data;};
+ const note=(await call(repair,'notifications')).data.find(x=>x.caseId===r.id);
+ assert((await call(repair,'read',{id:r.id,notificationId:note.id})).ok);
+ assert(!(await call(repair,'notifications')).data.find(x=>x.id===note.id).unread);
+ const initialRevision=r.revision;
  await act(repair,'receive');
+ assert(!(await call(repair,'act',{id:r.id,revision:initialRevision,operation:'receive'})).ok);
  const t={diagnosis:'Diagnóstico QA',fault:'Falla QA',actions:'Reparación QA',result:'Reparado',faultLocations:['Batería / Carga'],date:'2026-09-19',technician:'Falso'};
  await act(repair,'send-quality',t);assert.equal(r.technical.technician,'QA reparacion');
  assert(!(await call(intake,'act',{id:r.id,revision:r.revision,operation:'finish',payload:{decision:'approved',date:'2026-09-19'}})).ok);
  await act(quality,'return-repair',{decision:'rejected',notes:'Observación QA',date:'2026-09-19'});
  assert((await call(admin,'notifications')).data.some(n=>n.caseId===r.id));
  await act(repair,'send-quality',t);await act(quality,'finish',{decision:'approved',date:'2026-09-19'});assert.equal(r.status,'finalizado');
+ assert((await call(admin,'reset-user-password',{id:quality.id,password:'Reset-'+pass})).ok);
+ const resetLogin=await request('/auth/v1/token?grant_type=password',{email:quality.email,password:'Reset-'+pass},{apikey:anon,'Content-Type':'application/json'});assert(resetLogin.ok);quality.token=resetLogin.data.access_token;
+ assert((await call(quality,'profile')).data.mustChangePassword);assert.equal((await call(quality,'list')).status,403);
+ const archived={...r,id:crypto.randomUUID(),intake:{...r.intake,folio:'QA-IMPORT-'+crypto.randomUUID()}};
+ assert(!(await call(repair,'import-local',{record:archived,evidence:[]})).ok);
+ const imported=await call(admin,'import-local',{record:archived,evidence:[]});assert(imported.ok,JSON.stringify(imported.data));caseIds.push(archived.id);
+ assert((await call(admin,'import-local',{record:archived,evidence:[]})).data.skipped);
  const bypass=await request('/rest/v1/rematech_cases?select=id',undefined,{apikey:anon,Authorization:`Bearer ${intake.token}`},'GET');assert(!bypass.ok,'Client must not bypass server permissions');
  console.log('PASS: four independent accounts, temporary password gate, cross-session registration, role guards, repair, rejection, notifications, completion, direct database denied.');
 }finally{
