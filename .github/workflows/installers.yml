@@ -33,6 +33,23 @@ jobs:
       - run: npm run release:check
       - run: node scripts/configure-cloud-build.mjs
       - run: npm run tauri build -- --config src-tauri/tauri.cloud.conf.json --target ${{ matrix.target }} --bundles ${{ matrix.bundles }}
+      - name: Verify Windows installation and launch
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $installer = Get-ChildItem 'src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*-setup.exe' | Select-Object -First 1
+          $installDir = Join-Path $env:RUNNER_TEMP 'RematechSmoke'
+          $result = Start-Process -FilePath $installer.FullName -ArgumentList '/S',"/D=$installDir" -Wait -PassThru
+          if ($result.ExitCode -ne 0) { throw "Installer failed: $($result.ExitCode)" }
+          $binary = Get-ChildItem $installDir -Filter 'rematech-postventa.exe' -Recurse | Select-Object -First 1
+          if (-not $binary) { throw 'Installed executable not found' }
+          $app = Start-Process -FilePath $binary.FullName -PassThru
+          Start-Sleep -Seconds 10
+          if ($app.HasExited) { throw "App exited unexpectedly: $($app.ExitCode)" }
+          Stop-Process -Id $app.Id
+      - name: Verify both Mac architectures
+        if: runner.os == 'macOS'
+        run: lipo -verify_arch arm64 x86_64 'src-tauri/target/universal-apple-darwin/release/bundle/macos/Rematech Postventa.app/Contents/MacOS/rematech-postventa'
       - uses: actions/upload-artifact@v4
         with:
           name: Rematech-${{ matrix.target }}

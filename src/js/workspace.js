@@ -81,6 +81,9 @@ async function signIn() {
   $("#setup-name-label").hidden = !first;
   $("#open-recovery").hidden = first || CLOUD_MODE;
   $("#account-guidance").hidden = first;
+  $("#account-guidance").textContent = CLOUD_MODE
+    ? "Si olvidaste tu contraseña, solicita al administrador una temporal."
+    : "Hay cuentas registradas en este equipo.";
   $("#login-name").required = first;
   $("#login-title").textContent = first
     ? "Configura tu espacio de trabajo"

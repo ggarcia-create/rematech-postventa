@@ -1,3 +1,20 @@
+# Rematech Postventa 1.5 — operación compartida
+
+La distribución 1.5 usa Supabase Auth, tablas con RLS sin acceso directo del cliente y una Edge Function que valida la identidad, el rol y la revisión del expediente en cada operación. El instalador solo contiene una clave pública.
+
+- Compilación: GitHub Actions `Instaladores Rematech`, Windows x64 NSIS con WebView2 offline y Mac universal.
+- Variables de compilación: `VITE_CLOUD_MODE=true`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`. Nunca usar claves secretas ni service_role en el cliente.
+- Migración: `supabase/migrations/202609190001_shared_workspace.sql` y función `supabase/functions/rematech`. El cliente no puede crear por su cuenta el administrador inicial.
+- Primer acceso: contraseña temporal obligatoria; administración de usuarios y restablecimiento disponibles en Configuración.
+- Expedientes anteriores: transferencia explícita desde Configuración, sin borrar la copia local ni reemplazar registros existentes.
+- Correo real: requiere `RESEND_API_KEY`, `MAIL_FROM` y `REPAIR_EMAIL` como secretos del servidor, además del dominio verificado. Sin ellos no se simula el envío en la distribución compartida.
+- Pruebas: `npm test` verifica el modo local en Chromium y WebKit. Los scripts `cloud-smoke.mjs` y `cloud-ui-smoke.mjs` crean y eliminan únicamente sus cuentas y registros QA; requieren credenciales de servicio privadas fuera del repositorio. No son parte del instalador.
+- Firma comercial y notarización: no configuradas. Los instaladores internos pueden mostrar avisos del sistema operativo.
+
+El resto del documento conserva el historial y las instrucciones de la edición local anterior; sus referencias a demo o almacenamiento local no describen la distribución compartida 1.5.
+
+---
+
 # REMATECH POSTVENTA
 
 Aplicación **nativa de escritorio** con Tauri 2, HTML5, CSS3 y JavaScript modular. Un mismo código fuente para Windows 11 y macOS Apple Silicon / Intel. No utiliza React, Vue, Angular ni CDN. Vite es exclusivamente el compilador y servidor de desarrollo; la aplicación distribuida corre en una ventana Tauri con sus recursos locales.

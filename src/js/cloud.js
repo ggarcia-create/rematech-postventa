@@ -67,7 +67,7 @@ export const cloudAuth = {
     session = null;
     current = null;
     pending = null;
-    if (token) authRequest("logout", {}, token).catch(() => {});
+    if (token) authRequest("logout?scope=local", {}, token).catch(() => {});
   },
   async changeTemporaryPassword(password, confirmation) {
     if (!pending) throw new Error("Inicia sesión con tu contraseña temporal.");

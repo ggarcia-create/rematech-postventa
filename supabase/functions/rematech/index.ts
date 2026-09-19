@@ -52,11 +52,11 @@ Deno.serve(async request=>{
   const allCases=async()=>{const rows:any[]=[];for(let offset=0;;offset+=500){const batch=check(await db.from('rematech_cases').select('id,body').order('id').range(offset,offset+499));rows.push(...batch);if(batch.length<500)return rows;}};
   if(input.action==='list'){
    const rows=await allCases();
-   return answer(rows.map((r:any)=>({...r.body,evidence:[]})));
+   return answer(rows.map((r:any)=>({...r.body,evidence:[]})).sort((a:any,b:any)=>b.updatedAt.localeCompare(a.updatedAt))); 
   }
   if(input.action==='notifications'){
    const rows=await allCases();
-   const read=check(await db.from('rematech_notification_reads').select('notification_id').eq('user_id',user.id));const ids=new Set(read.map((r:any)=>r.notification_id));
+   const ids=new Set<string>();for(let offset=0;;offset+=500){const read=check(await db.from('rematech_notification_reads').select('notification_id').eq('user_id',user.id).order('notification_id').range(offset,offset+499));read.forEach((r:any)=>ids.add(r.notification_id));if(read.length<500)break;}
    return answer(rows.flatMap((r:any)=>(r.body.notifications||[]).filter((n:any)=>n.targets.includes(user.role)).map((n:any)=>({...n,caseId:r.id,folio:r.body.intake.folio,unread:!ids.has(n.id)}))).sort((a:any,b:any)=>b.at.localeCompare(a.at)));
   }
   if(input.action==='register'||input.action==='import-local'){
