@@ -1,3 +1,23 @@
+# Verificación de la distribución compartida 1.5
+
+- 32 pruebas locales aprobadas en Chromium y WebKit.
+- Prueba contra Supabase desplegado con cuatro cuentas QA independientes: bloqueo de contraseña temporal, permisos por rol, alta compartida, notificación de ingreso, recepción, envío a Calidad, rechazo con devolución, aviso al administrador y finalización.
+- Identidad técnica tomada de la cuenta; intentos de suplantar el nombre ignorados.
+- Revisión obsoleta rechazada; acuse individual de notificación persistido.
+- Restablecimiento administrativo exige volver a cambiar la contraseña; intento de otro rol rechazado.
+- Transferencia local reservada al administrador, preserva el expediente y omite un identificador ya transferido.
+- Evidencia PNG sintética guardada en bucket privado y recuperada mediante URL temporal; contenido verificado byte a byte.
+- Acceso directo a tablas con la credencial de un usuario rechazado.
+- Prueba de la compilación web de producción contra el servicio real en Chromium y WebKit: login, rechazo de la misma contraseña, cambio obligatorio, consulta de usuarios, logout y nuevo login inmediato.
+- Las cuentas y expedientes de prueba se eliminaron al finalizar cada prueba. No se modificaron expedientes reales.
+- Escaneo del repositorio: ninguna clave privada del proyecto incluida; archivos .env y carpeta entrega ignorados.
+
+Los instaladores finales se verifican adicionalmente mediante el workflow de GitHub: instalación silenciosa y proceso de Windows, y presencia de ambas arquitecturas en Mac. El correo desde rematech.mx sigue pendiente de configuración del proveedor y DNS; no se afirma haber enviado correos. No se cuenta con firma comercial/notarización.
+
+---
+
+## Historial de verificaciones locales anteriores
+
 # Verificación de la entrega 1.4.0
 
 - Login centrado, textos reducidos, iconos SVG coherentes, formularios y expediente con jerarquía visual más sobria.

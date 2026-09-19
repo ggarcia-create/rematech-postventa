@@ -22,7 +22,9 @@ try{
  const {newDraft}=await import('../src/js/utils.js');
  const d={...newDraft(),client:'QA temporal',equipment:'Equipo QA',serial:'QA-SN',description:'Prueba de flujo',components:[{component:'Batería / Carga',faults:['No carga'],other:''}]};
  assert(!(await call(repair,'register',{intake:d,evidence:[]})).ok);
- const created=await call(intake,'register',{intake:d,evidence:[]});assert(created.ok,JSON.stringify(created.data));let r=created.data;caseIds.push(r.id);
+ const png='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jBz0AAAAASUVORK5CYII=';
+ const created=await call(intake,'register',{intake:d,evidence:[{type:'image/png',base64:png}]});assert(created.ok,JSON.stringify(created.data));let r=created.data;caseIds.push(r.id);
+ const withImage=await call(repair,'get',{id:r.id});assert(withImage.ok);const storedImage=await fetch(withImage.data.evidence[0]);assert(storedImage.ok);assert.equal(Buffer.from(await storedImage.arrayBuffer()).toString('base64'),png);
  assert((await call(repair,'list')).data.some(x=>x.id===r.id));
  assert((await call(repair,'notifications')).data.some(x=>x.caseId===r.id));
  const act=async(user,operation,payload={})=>{const res=await call(user,'act',{id:r.id,revision:r.revision,operation,payload});assert(res.ok,JSON.stringify(res.data));r=res.data;};
@@ -48,6 +50,6 @@ try{
  const bypass=await request('/rest/v1/rematech_cases?select=id',undefined,{apikey:anon,Authorization:`Bearer ${intake.token}`},'GET');assert(!bypass.ok,'Client must not bypass server permissions');
  console.log('PASS: four independent accounts, temporary password gate, cross-session registration, role guards, repair, rejection, notifications, completion, direct database denied.');
 }finally{
- for(const id of caseIds){await request(`/rest/v1/rematech_notification_reads?case_id=eq.${id}`,undefined,adminHeaders,'DELETE');await request(`/rest/v1/rematech_cases?id=eq.${id}`,undefined,adminHeaders,'DELETE');}
+ for(const id of caseIds){await request('/storage/v1/object/rematech-evidence',{prefixes:[`${id}/0`,`${id}/1`]},adminHeaders,'DELETE');await request(`/rest/v1/rematech_notification_reads?case_id=eq.${id}`,undefined,adminHeaders,'DELETE');await request(`/rest/v1/rematech_cases?id=eq.${id}`,undefined,adminHeaders,'DELETE');}
  for(const id of accounts){await request(`/rest/v1/rematech_profiles?id=eq.${id}`,undefined,adminHeaders,'DELETE');await request(`/auth/v1/admin/users/${id}`,undefined,adminHeaders,'DELETE');}
 }

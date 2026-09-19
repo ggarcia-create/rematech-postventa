@@ -35,8 +35,7 @@ begin
 end $$;
 revoke all on function public.rematech_save_case(uuid,integer,jsonb) from public,anon,authenticated;
 grant execute on function public.rematech_save_case(uuid,integer,jsonb) to service_role;
--- Read receipts use their own transaction and preserve revision. The save function above
--- must merge them while holding the same row lock to avoid losing concurrent receipts.
+-- Read receipts are stored separately, so case updates cannot overwrite them.
 create table public.rematech_notification_reads (
  user_id uuid not null references auth.users(id),
  case_id uuid not null references public.rematech_cases(id),
