@@ -56,7 +56,7 @@ export function initializeUpdater() {
             if (total) { progress.max = total; progress.value = downloaded; }
           }
           if (event.event === 'Finished') status.textContent = 'Verificando firma e instalando…';
-        });
+        }, { timeout: 15 * 60 * 1000 });
         installed = true;
       }
       status.textContent = 'Actualización instalada. Reiniciando…';

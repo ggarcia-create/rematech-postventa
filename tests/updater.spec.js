@@ -7,8 +7,9 @@ async function prepare(page, failure = '') {
     window.__TAURI_INTERNALS__ = {
       transformCallback: () => 1,
       unregisterCallback: () => {},
-      invoke: async (command) => {
+      invoke: async (command, args) => {
         window.updateCalls.push(command);
+        if (command === 'plugin:updater|download_and_install') window.downloadTimeout = args.timeout;
         if (command === 'plugin:app|version') return '1.6.0';
         if (command === 'plugin:updater|check') {
           if (failure === 'check') throw new Error('offline');
@@ -33,6 +34,7 @@ test('requires explicit install and renders release notes as text', async ({ pag
   await page.locator('#check-updates').click();
   await page.locator('#install-update').click();
   await expect.poll(() => page.evaluate(() => window.updateCalls.includes('plugin:process|restart'))).toBe(true);
+  expect(await page.evaluate(() => window.downloadTimeout)).toBe(900000);
 });
 test('failed verification never restarts and permits retry', async ({ page }) => {
   await prepare(page, 'signature');
