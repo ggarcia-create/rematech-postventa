@@ -691,6 +691,8 @@
         "npm:@tauri-apps/cli@2",
         "npm:@tauri-apps/plugin-dialog@2",
         "npm:@tauri-apps/plugin-fs@2",
+        "npm:@tauri-apps/plugin-process@^2.3.1",
+        "npm:@tauri-apps/plugin-updater@^2.12.0",
         "npm:jspdf@^4.2.1",
         "npm:prettier@^3.9.8",
         "npm:vite@7"

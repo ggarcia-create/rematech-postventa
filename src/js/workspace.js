@@ -245,6 +245,8 @@ async function act(action) {
       payload = Object.fromEntries(new FormData($("#quality-form")));
     if (action === "add-comment")
       payload = Object.fromEntries(new FormData($("#comment-form")));
+    if (action === "update-return")
+      payload = Object.fromEntries(new FormData($("#return-form")));
     const drafts =
       action === "add-comment"
         ? [
@@ -289,6 +291,7 @@ async function act(action) {
       "return-repair":
         "Equipo devuelto a Reparación. Se notificó a Reparación y al administrador.",
       "save-technical": "Información técnica guardada.",
+      "update-return": "Estado de devolución actualizado y agregado al historial.",
     }[action];
     await refresh();
   } catch (error) {

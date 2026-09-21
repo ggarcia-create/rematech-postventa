@@ -21,6 +21,7 @@ export const RESULTS = [
   "No procede garantía",
   "Requiere pruebas",
 ];
+export const RETURN_RESOLUTIONS = ["En proceso de devolución", "Cerrado con reembolso al comprador", "Cerrado con reembolso parcial", "Cerrado a favor de Rematech"];
 export const FAULT_LOCATIONS = [
   ...Object.keys(CATALOG),
   "Sin falla detectada",
@@ -83,6 +84,7 @@ export function normalizeRecord(record) {
   r.comments ??= [];
   r.notifications ??= [];
   r.qualityReviews ??= [];
+  r.returnResolution ??= r.intake?.intakeType === "Devolución" ? "En proceso de devolución" : "";
   return r;
 }
 export function requireRole(user, role) {
@@ -210,7 +212,14 @@ function validateTechnical(t) {
 export function applyAction(record, action, payload, user) {
   const r = normalizeRecord(record);
   let description;
-  if (action === "receive") {
+  if (action === "update-return") {
+    if (r.intake?.intakeType !== "Devolución") throw new Error("Este expediente no es una devolución.");
+    requireRole(user, "admin");
+    if (!RETURN_RESOLUTIONS.includes(payload.resolution)) throw new Error("Selecciona un estado de devolución válido.");
+    r.returnResolution = payload.resolution;
+    description = `Estado de devolución actualizado: ${payload.resolution}`;
+    notify(r, user, ["admin", "ingresos"], description);
+  } else if (action === "receive") {
     requireRole(user, "reparacion");
     if (r.status !== "pendiente")
       throw new Error("Este equipo ya fue recibido. Actualiza la consulta.");

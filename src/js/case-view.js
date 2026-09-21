@@ -6,6 +6,7 @@ import {
   FAULT_LOCATIONS,
   goesToQuality,
   qualityDefaults,
+  RETURN_RESOLUTIONS,
 } from "./workflow.js";
 import { escapeHTML as e, displayDate } from "./utils.js";
 import { faultNames } from "./documents.js";
@@ -29,6 +30,8 @@ export function caseDetailHTML(r, user, images) {
     can(user, "reparacion");
   const qualityEditable = r.status === "calidad" && can(user, "calidad");
   const q = qualityEditable ? qualityDefaults(user.name) : r.quality;
+  const returnEditable = r.intake?.intakeType === "Devolución" && can(user, "admin");
+  const returnSection = r.intake?.intakeType === "Devolución" ? `<section class="case-block return-status"><h3>SEGUIMIENTO DE DEVOLUCIÓN</h3><p class="help">Actualiza el resultado conforme avance la devolución. El cambio queda registrado en el historial.</p><form id="return-form"><label>Estado actual<select name="resolution" ${returnEditable ? "" : "disabled"}>${RETURN_RESOLUTIONS.map((value) => `<option ${r.returnResolution === value ? "selected" : ""}>${e(value)}</option>`).join("")}</select></label>${returnEditable ? '<div class="case-actionbar"><button type="button" data-case-action="update-return" class="primary">Actualizar estado</button></div>' : ""}</form></section>` : "";
   const locations = t.faultLocations || [];
   const tech = `<section class="case-block"><h3>USO EXCLUSIVO DEL ÁREA DE REPARACIÓN</h3>${!editable ? '<p class="readonly-note">Esta etapa está cerrada para edición. El expediente permanece disponible para consulta.</p>' : ""}<form id="technical-form"><div class="technical-form">${field("Diagnóstico técnico", "diagnosis", t.diagnosis, { multiline: true, full: true, disabled: !editable })}<fieldset class="fault-location-fieldset full"><legend>¿Dónde se encontró la falla?</legend><p>Marca los componentes confirmados durante el diagnóstico.</p><div class="fault-location-grid">${FAULT_LOCATIONS.map((value) => `<label class="check-card"><input type="checkbox" name="faultLocations" value="${e(value)}" ${locations.includes(value) ? "checked" : ""} ${editable ? "" : "disabled"}><span>${e(value)}</span></label>`).join("")}</div></fieldset>${field("Detalle de la falla encontrada", "fault", t.fault, { multiline: true, disabled: !editable })}${field("Acciones realizadas / Componentes utilizados", "actions", t.actions, { multiline: true, disabled: !editable })}<label>Resultado<select name="result" ${editable ? "" : "disabled"}><option value="">Selecciona el resultado</option>${RESULTS.map((result) => `<option ${t.result === result ? "selected" : ""}>${result}</option>`).join("")}</select></label>${field("Técnico · cuenta que registra el trabajo", "technician", editable ? user.name : t.technician, { disabled: true })}${field("Fecha", "date", t.date, { disabled: !editable })}<label class="full admin-comment" ${!editable || !t.result || goesToQuality(t.result) ? "hidden" : ""}>Comentario para el administrador<textarea name="adminComment" maxlength="4000" rows="3" placeholder="Explica qué se requiere y qué debe resolver Administración.">${e(t.adminComment)}</textarea></label></div>${editable ? `<p id="result-routing" class="routing-note"></p><div class="case-actionbar"><button type="button" data-case-action="save-technical">Guardar información</button><button type="button" data-case-action="send-quality" class="primary" hidden>Enviar a Calidad →</button><button type="button" data-case-action="notify-admin" class="primary" hidden>Notificar al administrador</button></div>` : ""}</form></section>`;
   const legacyInvalid = r.status === "calidad" && !goesToQuality(t.result);
@@ -40,7 +43,7 @@ export function caseDetailHTML(r, user, images) {
   const reviews = r.qualityReviews.length
     ? `<section class="case-block"><h3>INSPECCIONES DE CALIDAD ANTERIORES</h3>${r.qualityReviews.map((q) => `<article class="quality-review ${q.decision}"><strong>${q.decision === "approved" ? "Inspección aprobada" : "Inspección no aprobada"}</strong><small>${e(q.reviewer)} · ${e(stamp(q.at))}</small>${q.notes ? `<p>${e(q.notes)}</p>` : ""}<details><summary>Diagnóstico revisado</summary><p>${e(q.technical?.diagnosis || "—")}</p><p>${e(q.technical?.actions || "—")}</p><p>Resultado: ${e(q.technical?.result || "—")}</p></details></article>`).join("")}</section>`
     : "";
-  return `<span class="status-badge ${r.status}">${STATUSES[r.status]}</span><div class="case-overview">${[
+  return `${returnSection}<span class="status-badge ${r.status}">${STATUSES[r.status]}</span><div class="case-overview">${[
     ["Cliente", r.intake.client],
     ["Equipo", r.intake.equipment],
     ["Número de serie", r.intake.serial],
