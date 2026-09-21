@@ -113,6 +113,14 @@
         </div>
       </form>
     </dialog>
+    <dialog id="update-dialog" aria-labelledby="update-title">
+      <h2 id="update-title">Actualizaciones</h2>
+      <p id="update-status" role="status"></p>
+      <p id="update-notes" style="white-space: pre-wrap"></p>
+      <progress id="update-progress" hidden aria-label="Descarga de actualización"></progress>
+      <p>Guarda los cambios del expediente antes de actualizar. El programa se cerrará y conservará tus cuentas y registros.</p>
+      <div class="actions"><button id="close-update">Ahora no</button><button id="install-update" class="primary" hidden>Instalar y reiniciar</button></div>
+    </dialog>
     <div id="application" hidden>
       <header class="topbar">
         <div class="brand">
@@ -120,6 +128,7 @@
           <div>REMATECH <span class="brand-sub">POSTVENTA</span></div>
         </div>
         <div class="top-status">
+          <button id="check-updates" hidden>Actualizaciones</button>
           <button id="open-notifications" class="notification-trigger">
             Notificaciones <span id="notification-count">0</span></button
           ><span id="mode-label">MODO DEMO</span><span class="status-dot"></span

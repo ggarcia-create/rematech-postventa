@@ -420,3 +420,6 @@ sidebar.querySelectorAll("[data-route]").forEach((button) => {
   button.title = button.textContent.trim();
   button.addEventListener("click", () => setMenu(false));
 });
+
+import { initializeUpdater } from './updater.js';
+initializeUpdater();

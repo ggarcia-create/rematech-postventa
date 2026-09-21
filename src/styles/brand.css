@@ -583,3 +583,9 @@
     min-width: 190px;
   }
 }
+
+#update-dialog { max-width: 520px; width: calc(100vw - 48px); padding: 28px; border: 1px solid #dae2df; border-radius: 20px; color: #10203a; }
+#update-dialog::backdrop { background: #10203a66; }
+#update-dialog p { line-height: 1.6; }
+#update-progress { width: 100%; accent-color: #00d99b; }
+#check-updates.update-available { background: #00d99b; color: #10203a; }

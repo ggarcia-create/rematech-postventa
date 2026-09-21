@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Rematech Postventa",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "identifier": "mx.rematech.postventa",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -49,6 +49,18 @@
         ],
         "displayLanguageSelector": false,
         "installMode": "currentUser"
+      }
+    },
+    "createUpdaterArtifacts": true
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDY3MkM5OTA4NkM2RjhDNjgKUldSb2pHOXNDSmtzWjV2clo2SWVkdnVzK1pSZThaTHpteUlzTDhVbXZiZUdOcERYVWxzK0c1LzEK",
+      "endpoints": [
+        "https://github.com/ggarcia-create/rematech-postventa-releases/releases/latest/download/latest.json"
+      ],
+      "windows": {
+        "installMode": "passive"
       }
     }
   }

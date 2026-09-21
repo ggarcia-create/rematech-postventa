@@ -20,6 +20,8 @@ jobs:
       VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
       VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
       VITE_CLOUD_MODE: 'true'
+      TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+      TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -59,4 +61,7 @@ jobs:
           path: |
             src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*-setup.exe
             src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+            src-tauri/target/${{ matrix.target }}/release/bundle/nsis/*.sig
+            src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.tar.gz
+            src-tauri/target/${{ matrix.target }}/release/bundle/macos/*.sig
           if-no-files-found: error
