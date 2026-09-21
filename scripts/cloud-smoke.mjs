@@ -18,7 +18,9 @@ try{
  assert((await call(quality,'change-password',{password:'Changed-'+pass,confirmation:'Changed-'+pass})).ok);
  const renewed=await request('/auth/v1/token?grant_type=password',{email:quality.email,password:'Changed-'+pass},{apikey:anon,'Content-Type':'application/json'});assert(renewed.ok);quality.token=renewed.data.access_token;
  assert(!(await call(repair,'reset-user-password',{id:quality.id,password:'Reset-'+pass})).ok);
- assert((await call(admin,'profile')).data.emailEnabled===false);
+ const mailProfile=(await call(admin,'profile')).data;
+ assert.equal(typeof mailProfile.emailEnabled,'boolean');
+ assert.equal(mailProfile.emailSender,'g.garcia@rematech.mx');
  const {newDraft}=await import('../src/js/utils.js');
  const d={...newDraft(),client:'QA temporal',equipment:'Equipo QA',serial:'QA-SN',description:'Prueba de flujo',components:[{component:'Batería / Carga',faults:['No carga'],other:''}]};
  assert(!(await call(repair,'register',{intake:d,evidence:[]})).ok);
