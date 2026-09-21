@@ -1,4 +1,4 @@
-# Rematech Postventa 1.5 — operación compartida
+# Rematech Postventa 1.5.1 — operación compartida
 
 La distribución 1.5 usa Supabase Auth, tablas con RLS sin acceso directo del cliente y una Edge Function que valida la identidad, el rol y la revisión del expediente en cada operación. El instalador solo contiene una clave pública.
 
@@ -7,7 +7,9 @@ La distribución 1.5 usa Supabase Auth, tablas con RLS sin acceso directo del cl
 - Migración: `supabase/migrations/202609190001_shared_workspace.sql` y función `supabase/functions/rematech`. El cliente no puede crear por su cuenta el administrador inicial.
 - Primer acceso: contraseña temporal obligatoria; administración de usuarios y restablecimiento disponibles en Configuración.
 - Expedientes anteriores: transferencia explícita desde Configuración, sin borrar la copia local ni reemplazar registros existentes.
-- Correo real: requiere `RESEND_API_KEY`, `MAIL_FROM` y `REPAIR_EMAIL` como secretos del servidor, además del dominio verificado. Sin ellos no se simula el envío en la distribución compartida.
+- Ingresos: **Registrar y enviar a Reparación** guarda el expediente, entrega la requisición en la bandeja interna y crea su notificación. No envía correo a Reparación. **Enviar ticket** es una acción separada para el cliente.
+- Correo real: Gmail API con autorización de `g.garcia@rematech.mx` y permiso `gmail.send`. El asunto es siempre `Ticket de seguimiento - FOLIO`. Requiere `GMAIL_CLIENT_ID`, `GMAIL_CLIENT_SECRET`, `GMAIL_REFRESH_TOKEN` y `GMAIL_ACCOUNT` como secretos de Supabase, nunca en los instaladores. Sin autorización no se simula el envío.
+- Preparación del correo: crear un cliente OAuth web interno de la organización con redirección `http://127.0.0.1:8765/oauth2callback`; ejecutar `node scripts/connect-gmail.mjs /ruta/cliente.json` y autorizar la cuenta en Google. El script confirma la identidad y genera `/tmp/rematech-gmail.env` privado para cargarlo con `supabase secrets set --env-file /tmp/rematech-gmail.env --project-ref REF`. Eliminar después el archivo temporal. No guardar el JSON del cliente ni los tokens en el repositorio.
 - Pruebas: `npm test` verifica el modo local en Chromium y WebKit. Los scripts `cloud-smoke.mjs` y `cloud-ui-smoke.mjs` crean y eliminan únicamente sus cuentas y registros QA; requieren credenciales de servicio privadas fuera del repositorio. No son parte del instalador.
 - Firma comercial y notarización: no configuradas. Los instaladores internos pueden mostrar avisos del sistema operativo.
 
