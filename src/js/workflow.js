@@ -224,6 +224,16 @@ export function applyAction(record, action, payload, user) {
     r.returnResolution = payload.resolution;
     description = `Estado de devolución actualizado: ${payload.resolution}`;
     notify(r, user, ["admin", "ingresos"], description);
+  } else if (action === "update-intake") {
+    requireRole(user, "admin");
+    if (payload.serial !== undefined) r.intake.serial = String(payload.serial || "").trim();
+    if (payload.resolution !== undefined) {
+      r.intake.resolution = String(payload.resolution || "").trim();
+      if (r.intake.intakeType === "Devolución" && RETURN_RESOLUTIONS.includes(r.intake.resolution)) r.returnResolution = r.intake.resolution;
+    }
+    description = "Administrador actualizó número de serie y resolución";
+    r.history.push(audit(user, description, r.status));
+    notify(r, user, ["admin", "ingresos", "reparacion"], description);
   } else if (action === "receive") {
     requireRole(user, "reparacion");
     if (r.status !== "pendiente")

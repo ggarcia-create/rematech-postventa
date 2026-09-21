@@ -156,6 +156,12 @@ const localAuth = {
       };
     });
   },
+  async setPermissions(id, permissions) {
+    requireRole(currentUser, "admin");
+    return transact("users", "readwrite", (store, done, fail) => {
+      const q = store.get(id); q.onsuccess = () => { if (!q.result) return fail(new Error("Usuario no encontrado.")); store.put({ ...q.result, permissions: [...new Set(permissions)] }); done(); };
+    });
+  },
   async resetPassword(email, password, confirmation, code) {
     if (password.length < 10)
       throw new Error("Utiliza una contraseña de al menos 10 caracteres.");

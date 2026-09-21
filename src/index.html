@@ -262,8 +262,11 @@
             <h1>Dashboard</h1>
             <div class="empty-state">
               <div class="empty-icon">▦</div>
-              <h2>Dashboard</h2>
-              <p>Esta sección queda reservada para una próxima etapa.</p>
+              <h2>Ventas manuales por mes</h2>
+              <p>Captura valores por canal para completar tus indicadores.</p>
+              <div class="manual-sales-grid" id="manual-sales-grid">${["Mercado Libre","Shopify","Coppel","Amazon"].map((channel)=>`<label>${channel}<input type="number" min="0" step="0.01" data-sales-channel="${channel}" placeholder="$0.00"></label>`).join("")}</div>
+              <label>Mes<select id="sales-month"><option>Enero</option><option>Febrero</option><option>Marzo</option><option>Abril</option><option>Mayo</option><option>Junio</option><option>Julio</option><option>Agosto</option><option>Septiembre</option><option>Octubre</option><option>Noviembre</option><option>Diciembre</option></select></label>
+              <strong id="manual-sales-total">Total: $0.00</strong>
             </div>
           </section>
           <section

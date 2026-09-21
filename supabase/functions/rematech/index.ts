@@ -51,6 +51,7 @@ Deno.serve(async request=>{
    return answer({ok:true});
   }
   if(input.action==='set-role'){admin();if(input.id===user.id||!Object.hasOwn(ROLES,input.role))throw new Error('No puedes cambiar tu propio rol o asignar un rol inválido.');check(await db.from('rematech_profiles').update({role:input.role}).eq('id',input.id));return answer({ok:true});}
+  if(input.action==='set-permissions'){admin();if(input.id===user.id||!Array.isArray(input.permissions))throw new Error('No puedes cambiar tus propios permisos.');check(await db.from('rematech_profiles').update({permissions:[...new Set(input.permissions.filter((p:string)=>['dashboard','ingresos','reparacion','calidad','settings'].includes(p)))]}).eq('id',input.id));return answer({ok:true});}
   const allCases=async()=>{const rows:any[]=[];for(let offset=0;;offset+=500){const batch=check(await db.from('rematech_cases').select('id,body').order('id').range(offset,offset+499));rows.push(...batch);if(batch.length<500)return rows;}};
   if(input.action==='list'){
    const rows=await allCases();

@@ -77,6 +77,7 @@ export const cloudAuth = {
   },
   create: (values) => cloudCall("create-user", values),
   setRole: (id, role) => cloudCall("set-role", { id, role }),
+  setPermissions: (id, permissions) => cloudCall("set-permissions", { id, permissions }),
   resetUserPassword: (id, password) =>
     cloudCall("reset-user-password", { id, password }),
   users: () => cloudCall("users"),

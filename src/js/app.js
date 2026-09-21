@@ -437,3 +437,24 @@ sidebar.querySelectorAll("[data-route]").forEach((button) => {
 
 import { initializeUpdater } from './updater.js';
 initializeUpdater();
+const salesKey = "rematech-manual-sales";
+function refreshManualSales() {
+  const month = $("#sales-month")?.value;
+  if (!month) return;
+  const data = JSON.parse(localStorage.getItem(salesKey) || "{}");
+  const row = data[month] || {};
+  document.querySelectorAll("[data-sales-channel]").forEach((input) => { input.value = row[input.dataset.salesChannel] || ""; });
+  const total = [...document.querySelectorAll("[data-sales-channel]")].reduce((sum, input) => sum + (Number(input.value) || 0), 0);
+  $("#manual-sales-total").textContent = `Total: $${total.toFixed(2)}`;
+}
+if ($("#sales-month")) {
+  refreshManualSales();
+  $("#sales-month").addEventListener("change", refreshManualSales);
+  $("#manual-sales-grid").addEventListener("input", () => {
+    const month = $("#sales-month").value;
+    const data = JSON.parse(localStorage.getItem(salesKey) || "{}");
+    data[month] = Object.fromEntries([...document.querySelectorAll("[data-sales-channel]")].map((input) => [input.dataset.salesChannel, Number(input.value) || 0]));
+    localStorage.setItem(salesKey, JSON.stringify(data));
+    refreshManualSales();
+  });
+}

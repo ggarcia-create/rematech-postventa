@@ -247,6 +247,8 @@ async function act(action) {
       payload = Object.fromEntries(new FormData($("#comment-form")));
     if (action === "update-return")
       payload = Object.fromEntries(new FormData($("#return-form")));
+    if (action === "update-intake")
+      payload = Object.fromEntries(new FormData($("#admin-intake-form")));
     const drafts =
       action === "add-comment"
         ? [
@@ -292,6 +294,7 @@ async function act(action) {
         "Equipo devuelto a Reparación. Se notificó a Reparación y al administrador.",
       "save-technical": "Información técnica guardada.",
       "update-return": "Estado de devolución actualizado y agregado al historial.",
+      "update-intake": "Datos del expediente actualizados.",
     }[action];
     await refresh();
   } catch (error) {
@@ -344,7 +347,7 @@ async function showUsers() {
           )
           .join(
             "",
-          )}</select><small>${u.mustChangePassword ? "Cambio de contraseña pendiente" : "Cuenta activa"}</small><small>Permisos: ${(u.permissions || []).join(", ") || "ninguno"}</small>${CLOUD_MODE && u.id !== auth.user().id ? `<button type="button" data-reset-user="${u.id}">Restablecer contraseña</button>` : ""}</div></div>`,
+          )}</select><small>${u.mustChangePassword ? "Cambio de contraseña pendiente" : "Cuenta activa"}</small><small>Permisos: ${(u.permissions || []).join(", ") || "ninguno"}</small>${u.id !== auth.user().id ? `<div class="permission-toggles">${[["dashboard","Dashboard"],["ingresos","Ingresos"],["reparacion","Reparación"],["calidad","Calidad"],["settings","Usuarios"]].map(([key,label])=>`<label><input type="checkbox" data-user-permission="${u.id}" value="${key}" ${(u.permissions||[]).includes(key)?"checked":""}>${label}</label>`).join("")}</div>` : ""}${CLOUD_MODE && u.id !== auth.user().id ? `<button type="button" data-reset-user="${u.id}">Restablecer contraseña</button>` : ""}</div></div>`,
     )
     .join("");
 }
@@ -601,6 +604,13 @@ export async function initializeWorkspace(source) {
       errorText("#user-message", error);
       await showUsers();
     }
+  });
+  $("#users-list").addEventListener("change", async (event) => {
+    if (!event.target.matches("[data-user-permission]")) return;
+    const id = event.target.dataset.userPermission;
+    const permissions = [...document.querySelectorAll(`[data-user-permission="${id}"]:checked`)].map((input) => input.value);
+    try { await auth.setPermissions(id, permissions); await showUsers(); }
+    catch (error) { errorText("#user-message", error); await showUsers(); }
   });
   $("#close-users").addEventListener("click", () => $("#users-dialog").close());
   $("#user-form").addEventListener("submit", async (event) => {
