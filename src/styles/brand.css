@@ -260,7 +260,7 @@
   }
   .capture-actions {
     display: grid;
-    grid-template-columns: 1.3fr 1fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
     gap: 12px;
     padding: 20px 0 30px;
     background: transparent;

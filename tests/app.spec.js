@@ -85,14 +85,13 @@ test("ticket widths, escaped input, modal validation and demo sends", async ({
   );
   await page.locator("#cancel-send").click();
   await battery(page);
-  await page.locator("#send-repair").click();
-  await expect(page.locator("#modal-content")).toContainText(
-    "reparacion@rematech.mx",
+  await expect(page.locator("#send-repair")).toHaveCount(0);
+  await page.locator("#register-intake").click();
+  await expect(page.locator("#notification")).toContainText(
+    "registrado y enviado a Reparación",
   );
-  await page.locator("#confirm-send").click();
-  await expect(page.locator("#send-status")).toContainText(
-    "Simulación exitosa",
-  );
+  await page.locator('[data-route="recepciones"]').click();
+  await expect(page.locator("#repair-list")).toContainText("María López");
 });
 test("two compressed images persist, attach only to repair, remove and clear", async ({
   page,

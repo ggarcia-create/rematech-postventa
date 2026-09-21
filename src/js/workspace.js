@@ -476,7 +476,7 @@ export async function initializeWorkspace(source) {
       $("#repair-filter").value = "";
       await refresh();
       notify(
-        `Ingreso ${draft.folio} registrado. Ya aparece en Consulta y recepciones.`,
+        `Ingreso ${draft.folio} registrado y enviado a Reparación. La requisición ya está disponible en su expediente.`,
       );
     } catch (error) {
       notify(error.message, true);

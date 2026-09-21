@@ -1,3 +1,4 @@
+import { deliverMail, mailConfigured, buildMessage, MAIL_ACCOUNT } from './mail.js';
 import { createClient } from 'npm:@supabase/supabase-js@2.116.0';
 import { createCase, applyAction, ROLES, STATUSES, normalizeRecord } from './shared/workflow.js';
 const headers={'Access-Control-Allow-Origin':'*','Access-Control-Allow-Headers':'authorization, apikey, content-type','Content-Type':'application/json'};
@@ -17,8 +18,9 @@ Deno.serve(async request=>{
   if(!profile?.active)return answer({error:'Cuenta no habilitada.'},403);
   const raw=await request.text(); if(raw.length>7000000)return answer({error:"Solicitud demasiado grande."},413);
   const input=JSON.parse(raw);
+  const mailEnv=Object.fromEntries(['GMAIL_CLIENT_ID','GMAIL_CLIENT_SECRET','GMAIL_REFRESH_TOKEN','GMAIL_ACCOUNT'].map(key=>[key,Deno.env.get(key)]));
   const user={id:profile.id,name:profile.name,email:profile.email,role:profile.role,mustChangePassword:profile.must_change_password};
-  if(input.action==='profile')return answer({...user,emailEnabled:Boolean(Deno.env.get('RESEND_API_KEY')&&Deno.env.get('MAIL_FROM'))});
+  if(input.action==='profile')return answer({...user,emailEnabled:mailConfigured(mailEnv),emailSender:MAIL_ACCOUNT});
   if(input.action==='change-password'){
    const {password,confirmation}=input;
    if(typeof password!=='string'||password.length<10||password!==confirmation)throw new Error('Usa al menos 10 caracteres y confirma la misma contraseña.');
@@ -85,16 +87,14 @@ Deno.serve(async request=>{
   }
   if(input.action==='email'){
    if(!['admin','ingresos','reparacion','calidad'].includes(user.role))throw new Error('Sin permiso para enviar documentos.');
-   const apiKey=Deno.env.get('RESEND_API_KEY'),sender=Deno.env.get('MAIL_FROM');
-   if(!apiKey||!sender)throw new Error('El servicio de correo aún no está configurado.');
+   if(!mailConfigured(mailEnv))throw new Error('Falta conectar la cuenta de Gmail de Rematech.');
    const destination=input.kind==='repair'?Deno.env.get('REPAIR_EMAIL'):input.destination;
-   if(!destination||! /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(destination))throw new Error('Correo de destino no válido.');
-   if(!['ticket','repair'].includes(input.kind)||typeof input.pdf!=='string'||!input.pdf.startsWith('JVBER')||input.pdf.length>4000000)throw new Error('Documento PDF no válido.');
+   const message={destination,kind:input.kind,folio:input.folio,pdf:input.pdf};
+   buildMessage(message);
    check(await db.rpc('rematech_claim_email',{p_user:user.id}));
-   const sent=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${apiKey}`,'Content-Type':'application/json'},body:JSON.stringify({from:sender,to:[destination],subject:`Rematech · ${String(input.folio||'Servicio').slice(0,80)}`,text:'Adjuntamos el documento de su servicio en Rematech.',attachments:[{filename:input.kind==='repair'?'Requisicion.pdf':'Ticket.pdf',content:input.pdf}]})});
-   if(!sent.ok)throw new Error('El proveedor no aceptó el correo. Revisa la configuración o intenta más tarde.');
-   return answer({demo:false});
+   return answer(await deliverMail(message,mailEnv));
   }
+
   const row=check(await db.from('rematech_cases').select('body,revision').eq('id',input.id).single());
   if(input.action==='get'){
    const record=normalizeRecord(row.body);

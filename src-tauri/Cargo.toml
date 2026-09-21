@@ -1,6 +1,6 @@
 [package]
 name = "rematech-postventa"
-version = "1.5.0"
+version = "1.5.1"
 edition = "2021"
 [lib]
 name = "rematech_postventa_lib"

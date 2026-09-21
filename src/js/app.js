@@ -308,7 +308,7 @@ $("#print").addEventListener("click", async () => {
 function openSend(next) {
   if (CLOUD_MODE && !auth.user()?.emailEnabled) {
     notify(
-      "Correo pendiente de configurar. Puedes guardar el PDF y compartirlo; los avisos internos ya funcionan.",
+      "Falta autorizar Gmail para enviar desde g.garcia@rematech.mx. Puedes guardar el PDF; Reparación recibe sus avisos dentro de la aplicación.",
       true,
     );
     return;
@@ -329,7 +329,7 @@ function openSend(next) {
     next === "ticket" ? "ENVIAR TICKET" : "ENVIAR REQUISICIÓN";
   $("#modal-content").innerHTML =
     next === "ticket"
-      ? `<div class="modal-file">Documento: <strong>${e(filename(next, draft.folio))}</strong></div><label>Correo del cliente:<input type="email" id="customer-email" required autocomplete="email" placeholder="cliente@correo.com"></label>`
+      ? `<div class="modal-file">Documento: <strong>${e(filename(next, draft.folio))}</strong><br>De: <strong>g.garcia@rematech.mx</strong><br>Asunto: <strong>${e(`Ticket de seguimiento - ${draft.folio}`)}</strong></div><label>Correo del cliente:<input type="email" id="customer-email" required autocomplete="email" placeholder="cliente@correo.com"></label>`
       : `<div class="modal-file"><strong>${e(draft.folio)}</strong><br>${e(draft.equipment)}</div><p>Destino: <strong>Área de Reparación</strong><br>${e(REPAIR_EMAIL)}</p><p style="margin-top:16px">Se enviará:<br>✓ Requisición de servicio técnico${evidence.map((b, i) => (b ? `<br>✓ Evidencia del cliente ${i + 1}` : "")).join("")}</p>`;
   $("#send-status").textContent = DEMO_MODE
     ? "Modo demo: se simulará el envío; no se mandará ningún correo."
@@ -341,7 +341,6 @@ function openSend(next) {
   $("#send-dialog").showModal();
 }
 $("#send-ticket").addEventListener("click", () => openSend("ticket"));
-$("#send-repair").addEventListener("click", () => openSend("repair"));
 $("#cancel-send").addEventListener("click", () => {
   if (!sending) $("#send-dialog").close();
 });
