@@ -1,7 +1,8 @@
-# Rematech Postventa 1.5.1 — operación compartida
+# Rematech Postventa 1.6.0 — operación compartida
 
 La distribución 1.5 usa Supabase Auth, tablas con RLS sin acceso directo del cliente y una Edge Function que valida la identidad, el rol y la revisión del expediente en cada operación. El instalador solo contiene una clave pública.
 
+- Actualizaciones: consulta de versiones y descarga firmada desde la aplicación. Las versiones 1.5.x requieren instalar 1.6.0 manualmente una vez; ver [ACTUALIZACIONES.md](ACTUALIZACIONES.md).
 - Compilación: GitHub Actions `Instaladores Rematech`, Windows x64 NSIS con WebView2 offline y Mac universal.
 - Variables de compilación: `VITE_CLOUD_MODE=true`, `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`. Nunca usar claves secretas ni service_role en el cliente.
 - Migración: `supabase/migrations/202609190001_shared_workspace.sql` y función `supabase/functions/rematech`. El cliente no puede crear por su cuenta el administrador inicial.

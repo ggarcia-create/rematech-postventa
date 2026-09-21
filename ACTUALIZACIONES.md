@@ -11,7 +11,7 @@ El repositorio privado conserva el código. El repositorio `ggarcia-create/remat
 3. Exigir que ambos trabajos pasen, incluidas las pruebas de instalación Windows y las verificaciones Mac. Descargar ambos artefactos a una carpeta nueva.
 4. Ejecutar `node scripts/prepare-update-release.mjs CARPETA_ARTEFACTOS CARPETA_PUBLICA`. Revisar versión y notas en latest.json.
 5. Crear una release borrador `vVERSION` en el repositorio de distribución. Adjuntar únicamente Rematech-Windows.exe, Rematech-Mac.dmg, Rematech-Mac.app.tar.gz y latest.json. Verificar los cuatro archivos antes de publicar el borrador como latest.
-6. Comprobar la URL pública de latest.json y probar una actualización desde la versión previa. Los usuarios verán el aviso al consultar de nuevo.
+6. Comprobar la URL pública de latest.json. Ejecutar `cargo run --manifest-path src-tauri/Cargo.toml --example verify_update` para descargar y verificar el paquete con el actualizador nativo, sin instalar. Probar también una actualización desde la versión previa. Los usuarios verán el aviso al consultar de nuevo.
 
 No publicar solo el manifiesto antes de los binarios. Cada versión usa URLs inmutables con etiqueta; no reemplazar los archivos de una versión publicada. Si surge un fallo, publicar una versión superior corregida. No se incluyen tokens de GitHub en las computadoras de los usuarios.
 
