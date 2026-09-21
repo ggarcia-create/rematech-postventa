@@ -321,6 +321,23 @@
                         <option>Devolución</option>
                       </select></label
                     ><label class="full"
+                      >Resolución / estatus<select name="resolution" id="resolution">
+                        <option value="">Pendiente de resolución</option>
+                        <option>En proceso de devolución</option>
+                        <option>Cerrado a favor de Rematech</option>
+                        <option>Cerrado con reembolso al comprador</option>
+                        <option>Cerrado con reembolso parcial</option>
+                      </select></label
+                    ><label id="partial-refund-field" hidden
+                      >Reembolso parcial (%)<select name="partialRefundPercent" id="partial-refund-percent">
+                        <option value="">Selecciona porcentaje</option>
+                        <option>10</option><option>20</option><option>25</option><option>30</option><option>40</option><option>50</option><option>60</option><option>70</option><option>75</option><option>80</option><option>90</option>
+                      </select></label
+                    ><label
+                      >Precio de venta (valor comercial)<input name="salePrice" id="sale-price" type="number" min="0" step="0.01" placeholder="$0.00" /></label
+                    ><label
+                      >Total<input name="total" id="total" type="number" readonly placeholder="$0.00" /></label
+                    ><label class="full"
                       >Responsable<input
                         name="responsible"
                         id="responsible"
@@ -586,6 +603,14 @@
             <option value="calidad">Calidad</option>
             <option value="admin">Administrador</option>
           </select></label
+        ><fieldset class="permissions-fieldset">
+          <legend>Permisos de acceso</legend>
+          <label><input type="checkbox" name="permissions" value="ingresos" checked /> Ver y crear ingresos</label>
+          <label><input type="checkbox" name="permissions" value="reparacion" /> Ver y gestionar Reparación</label>
+          <label><input type="checkbox" name="permissions" value="calidad" /> Ver y gestionar Calidad</label>
+          <label><input type="checkbox" name="permissions" value="dashboard" checked /> Ver dashboard</label>
+          <label><input type="checkbox" name="permissions" value="settings" /> Administrar usuarios y permisos</label>
+        </fieldset
         ><label
           >Contraseña temporal<input
             name="password"

@@ -7,12 +7,13 @@ import { validEmail } from "./utils.js";
 let currentUser = null;
 let pendingUser = null;
 const ITERATIONS = 310000;
-const publicUser = ({ id, name, email, role, mustChangePassword = false }) => ({
+const publicUser = ({ id, name, email, role, mustChangePassword = false, permissions = [] }) => ({
   id,
   name,
   email,
   role,
   mustChangePassword,
+  permissions,
 });
 async function derive(password, salt) {
   const key = await crypto.subtle.importKey(
@@ -65,7 +66,7 @@ const localAuth = {
     currentUser = null;
   },
   async create(
-    { name, email, password, role, temporary = false },
+    { name, email, password, role, permissions = [], temporary = false },
     first = false,
   ) {
     if (!first) requireRole(currentUser, "admin");
@@ -82,6 +83,7 @@ const localAuth = {
       email: normalize(email),
       role: first ? "admin" : role,
       mustChangePassword: !first && temporary,
+      permissions: first ? ["dashboard", "ingresos", "reparacion", "calidad", "settings"] : permissions,
       salt,
       hash,
     };

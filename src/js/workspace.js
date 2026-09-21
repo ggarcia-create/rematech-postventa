@@ -344,7 +344,7 @@ async function showUsers() {
           )
           .join(
             "",
-          )}</select><small>${u.mustChangePassword ? "Cambio de contraseña pendiente" : "Cuenta activa"}</small>${CLOUD_MODE && u.id !== auth.user().id ? `<button type="button" data-reset-user="${u.id}">Restablecer contraseña</button>` : ""}</div></div>`,
+          )}</select><small>${u.mustChangePassword ? "Cambio de contraseña pendiente" : "Cuenta activa"}</small><small>Permisos: ${(u.permissions || []).join(", ") || "ninguno"}</small>${CLOUD_MODE && u.id !== auth.user().id ? `<button type="button" data-reset-user="${u.id}">Restablecer contraseña</button>` : ""}</div></div>`,
     )
     .join("");
 }
@@ -608,8 +608,10 @@ export async function initializeWorkspace(source) {
     const button = event.submitter;
     button.disabled = true;
     try {
+      const formData = new FormData(event.target);
       await auth.create({
-        ...Object.fromEntries(new FormData(event.target)),
+        ...Object.fromEntries(formData),
+        permissions: formData.getAll("permissions"),
         temporary: true,
       });
       event.target.reset();

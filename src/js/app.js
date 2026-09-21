@@ -58,6 +58,19 @@ function fillFields() {
   for (const field of $("#intake-form").querySelectorAll("[name]"))
     if (Object.hasOwn(draft, field.name)) field.value = draft[field.name];
   $("#ticket-width").value = draft.ticketWidth;
+  updateResolutionFields();
+}
+function updateResolutionFields() {
+  const partial = draft.resolution === "Cerrado con reembolso parcial";
+  const field = $("#partial-refund-field");
+  if (field) field.hidden = !partial;
+  const percent = Number(draft.partialRefundPercent);
+  const sale = Number(draft.salePrice);
+  const total = partial && Number.isFinite(sale) && Number.isFinite(percent)
+    ? (sale * percent / 100).toFixed(2)
+    : (Number.isFinite(sale) ? sale.toFixed(2) : "");
+  draft.total = total;
+  if ($("#total")) $("#total").value = total;
 }
 function components() {
   const selected = draft.components.map((c) => c.component);
@@ -123,6 +136,7 @@ $("#intake-form").addEventListener("input", (event) => {
   const { name, value } = event.target;
   if (name && Object.hasOwn(draft, name)) {
     draft[name] = value;
+    if (["resolution", "partialRefundPercent", "salePrice"].includes(name)) updateResolutionFields();
     update();
   }
   if (event.target.matches(".other-input")) {

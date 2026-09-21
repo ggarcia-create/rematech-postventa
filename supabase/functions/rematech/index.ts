@@ -19,7 +19,7 @@ Deno.serve(async request=>{
   const raw=await request.text(); if(raw.length>7000000)return answer({error:"Solicitud demasiado grande."},413);
   const input=JSON.parse(raw);
   const mailEnv=Object.fromEntries(['GMAIL_CLIENT_ID','GMAIL_CLIENT_SECRET','GMAIL_REFRESH_TOKEN','GMAIL_ACCOUNT'].map(key=>[key,Deno.env.get(key)]));
-  const user={id:profile.id,name:profile.name,email:profile.email,role:profile.role,mustChangePassword:profile.must_change_password};
+  const user={id:profile.id,name:profile.name,email:profile.email,role:profile.role,mustChangePassword:profile.must_change_password,permissions:profile.permissions||[]};
   if(input.action==='profile')return answer({...user,emailEnabled:mailConfigured(mailEnv),emailSender:MAIL_ACCOUNT});
   if(input.action==='change-password'){
    const {password,confirmation}=input;
@@ -33,12 +33,12 @@ Deno.serve(async request=>{
   }
   if(profile.must_change_password)return answer({error:'Cambia tu contraseña temporal antes de continuar.'},403);
   const admin=()=>{if(user.role!=='admin')throw new Error('Acción exclusiva del administrador.');};
-  if(input.action==='users'){admin();return answer(check(await db.from('rematech_profiles').select('id,name,email,role,must_change_password,active')).map((p:any)=>({...p,mustChangePassword:p.must_change_password})));}
+  if(input.action==='users'){admin();return answer(check(await db.from('rematech_profiles').select('id,name,email,role,must_change_password,permissions,active')).map((p:any)=>({...p,mustChangePassword:p.must_change_password,permissions:p.permissions||[]})));}
   if(input.action==='create-user'){
-   admin();const {name,email,password,role}=input;
+   admin();const {name,email,password,role,permissions=[]}=input;
    if(typeof name!=='string'||!name.trim()||name.length>120||!Object.hasOwn(ROLES,role)||typeof password!=='string'||password.length<10)throw new Error('Revisa nombre, rol y contraseña temporal.');
    const created=check(await db.auth.admin.createUser({email,password,email_confirm:true})).user;
-   const saved=await db.from('rematech_profiles').insert({id:created.id,name:name.trim(),email:created.email,role,must_change_password:true});
+   const saved=await db.from('rematech_profiles').insert({id:created.id,name:name.trim(),email:created.email,role,permissions:Array.isArray(permissions)?permissions:[],must_change_password:true});
    if(saved.error){await db.auth.admin.deleteUser(created.id);throw new Error('No se pudo crear la cuenta.');}
    return answer({id:created.id});
   }
