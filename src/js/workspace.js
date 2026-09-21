@@ -4,7 +4,14 @@ import { caseDetailHTML, updateCaseControls } from "./case-view.js";
 import "../styles/workflow.css";
 import { auth } from "./auth.js";
 import { cases, localCases } from "./case-storage.js";
-import { can, ROLES, STATUSES, matchesCase } from "./workflow.js";
+import {
+  can,
+  ROLES,
+  PERMISSIONS,
+  defaultPermissions,
+  STATUSES,
+  matchesCase,
+} from "./workflow.js";
 import { escapeHTML as e, displayDate } from "./utils.js";
 import { generatePDF, savePDF } from "./pdf.js";
 
@@ -35,11 +42,15 @@ function closeCase() {
   selected = null;
 }
 function defaultRoute() {
-  return auth.user().role === "reparacion"
-    ? "recepciones"
-    : auth.user().role === "calidad"
-      ? "calidad"
-      : "ingresos";
+  const preferred =
+    auth.user().role === "reparacion"
+      ? "recepciones"
+      : auth.user().role === "calidad"
+        ? "calidad"
+        : "ingresos";
+  return [preferred, "dashboard", "ingresos", "recepciones", "calidad"].find(
+    (key) => can(auth.user(), key === "recepciones" ? "reparacion" : key),
+  );
 }
 function requireNewPassword() {
   const dialog = $("#password-change-dialog");
@@ -130,7 +141,17 @@ async function signIn() {
         $("#session-user").innerHTML =
           `${e(user.name)}<span>${ROLES[user.role]}</span>`;
         $("#manage-users").hidden = user.role !== "admin";
-        $('[data-route="ingresos"]').disabled = !can(user, "ingresos");
+        document.querySelectorAll("[data-route]").forEach((button) => {
+          button.disabled = !can(
+            user,
+            button.dataset.route === "recepciones"
+              ? "reparacion"
+              : button.dataset.route,
+          );
+        });
+        $("#manual-sales-grid")
+          ?.querySelectorAll("input")
+          .forEach((input) => (input.disabled = user.role !== "admin"));
         await navigate(defaultRoute());
         await refreshNotifications();
         resolve();
@@ -144,7 +165,8 @@ async function signIn() {
 }
 async function navigate(next) {
   if (!auth.user()) return;
-  if (next === "ingresos" && !can(auth.user(), "ingresos")) return;
+  if (next && !can(auth.user(), next === "recepciones" ? "reparacion" : next))
+    return;
   dismissNotice();
   route = next;
   document
@@ -293,7 +315,8 @@ async function act(action) {
       "return-repair":
         "Equipo devuelto a Reparación. Se notificó a Reparación y al administrador.",
       "save-technical": "Información técnica guardada.",
-      "update-return": "Estado de devolución actualizado y agregado al historial.",
+      "update-return":
+        "Estado de devolución actualizado y agregado al historial.",
       "update-intake": "Datos del expediente actualizados.",
     }[action];
     await refresh();
@@ -332,24 +355,42 @@ async function refreshNotifications() {
     $("#notifications-error").textContent = error.message;
   }
 }
-async function showUsers() {
+async function showUsers(onlyUserId) {
   $("#open-local-import").hidden = !CLOUD_MODE;
   const list = await auth.users();
-  $("#users-list").innerHTML = list
+  const html = list
+    .filter((u) => !onlyUserId || u.id === onlyUserId)
     .map(
       (u) =>
-        `<div class="user-row"><div>${e(u.name)}<small>${e(u.email)}</small></div><div><select aria-label="Rol de ${e(u.name)}" data-user-role="${u.id}" ${u.id === auth.user().id ? "disabled" : ""}>${Object.entries(
+        `<div class="user-row"><div class="user-identity"><strong>${e(u.name)}</strong><small>${e(u.email)}</small><small>${u.mustChangePassword ? "Cambio de contraseña pendiente" : "Cuenta activa"}</small></div><div class="user-access"><select aria-label="Rol de ${e(u.name)}" data-user-role="${u.id}" ${u.id === auth.user().id ? "disabled" : ""}>${Object.entries(
           ROLES,
         )
           .map(
             ([key, label]) =>
               `<option value="${key}" ${key === u.role ? "selected" : ""}>${label}</option>`,
           )
-          .join(
-            "",
-          )}</select><small>${u.mustChangePassword ? "Cambio de contraseña pendiente" : "Cuenta activa"}</small><small>Permisos: ${(u.permissions || []).join(", ") || "ninguno"}</small>${u.id !== auth.user().id ? `<div class="permission-toggles">${[["dashboard","Dashboard"],["ingresos","Ingresos"],["reparacion","Reparación"],["calidad","Calidad"],["settings","Usuarios"]].map(([key,label])=>`<label><input type="checkbox" data-user-permission="${u.id}" value="${key}" ${(u.permissions||[]).includes(key)?"checked":""}>${label}</label>`).join("")}</div>` : ""}${CLOUD_MODE && u.id !== auth.user().id ? `<button type="button" data-reset-user="${u.id}">Restablecer contraseña</button>` : ""}</div></div>`,
+          .join("")}</select>${
+          u.role === "admin"
+            ? "<small>Acceso completo · administración de usuarios</small>"
+            : `<div class="permission-toggles" role="group" aria-label="Permisos de ${e(u.name)}">${Object.entries(
+                PERMISSIONS,
+              )
+                .map(
+                  ([key, label]) =>
+                    `<label><input type="checkbox" data-user-permission="${u.id}" value="${key}" ${(u.permissions ?? defaultPermissions(u.role)).includes(key) ? "checked" : ""}><span>${label}</span></label>`,
+                )
+                .join(
+                  "",
+                )}</div><button type="button" data-save-permissions="${u.id}" class="primary" disabled>Guardar permisos</button>`
+        }<p class="user-access-status" role="status" aria-live="polite"></p>${CLOUD_MODE && u.id !== auth.user().id ? `<button class="reset-user" type="button" data-reset-user="${u.id}">Restablecer contraseña</button>` : ""}</div></div>`,
     )
     .join("");
+  if (onlyUserId) {
+    const row = [...document.querySelectorAll("[data-user-role]")]
+      .find((el) => el.dataset.userRole === onlyUserId)
+      ?.closest(".user-row");
+    if (row) row.outerHTML = html;
+  } else $("#users-list").innerHTML = html;
 }
 export async function initializeWorkspace(source) {
   intakeSource = source;
@@ -597,22 +638,62 @@ export async function initializeWorkspace(source) {
     event.target.disabled = true;
     try {
       await auth.setRole(event.target.dataset.userRole, event.target.value);
-      await showUsers();
+      await showUsers(event.target.dataset.userRole);
+      const row = [...document.querySelectorAll("[data-user-role]")]
+        .find((el) => el.dataset.userRole === event.target.dataset.userRole)
+        .closest(".user-row");
+      row.querySelector(".user-access-status").textContent =
+        "Rol guardado. Se aplicará al volver a iniciar sesión.";
+      event.target.disabled = false;
       $("#user-message").textContent =
         "Rol actualizado. Se aplicará en el próximo inicio de sesión.";
     } catch (error) {
       errorText("#user-message", error);
-      await showUsers();
+      event.target.disabled = false;
     }
   });
-  $("#users-list").addEventListener("change", async (event) => {
+  $("#users-list").addEventListener("change", (event) => {
     if (!event.target.matches("[data-user-permission]")) return;
-    const id = event.target.dataset.userPermission;
-    const permissions = [...document.querySelectorAll(`[data-user-permission="${id}"]:checked`)].map((input) => input.value);
-    try { await auth.setPermissions(id, permissions); await showUsers(); }
-    catch (error) { errorText("#user-message", error); await showUsers(); }
+    const row = event.target.closest(".user-row");
+    row.querySelector("[data-save-permissions]").disabled = false;
+    row.querySelector(".user-access-status").textContent =
+      "Cambios sin guardar";
+  });
+  $("#users-list").addEventListener("click", async (event) => {
+    const button = event.target.closest("[data-save-permissions]");
+    if (!button || button.disabled) return;
+    const row = button.closest(".user-row");
+    const inputs = [...row.querySelectorAll("[data-user-permission]")];
+    const role = row.querySelector("[data-user-role]");
+    const status = row.querySelector(".user-access-status");
+    const permissions = inputs
+      .filter((input) => input.checked)
+      .map((input) => input.value);
+    button.disabled = true;
+    role.disabled = true;
+    inputs.forEach((input) => (input.disabled = true));
+    status.textContent = "Guardando…";
+    try {
+      await auth.setPermissions(button.dataset.savePermissions, permissions);
+      status.textContent =
+        "Permisos guardados. Se aplicarán al volver a iniciar sesión.";
+    } catch (error) {
+      status.textContent = `No se guardaron: ${error.message}. Conservamos tu selección; vuelve a intentar.`;
+      button.disabled = false;
+    } finally {
+      role.disabled = false;
+      inputs.forEach((input) => (input.disabled = false));
+    }
   });
   $("#close-users").addEventListener("click", () => $("#users-dialog").close());
+  $('#user-form [name="role"]').addEventListener("change", (event) => {
+    const defaults = defaultPermissions(event.target.value);
+    document
+      .querySelectorAll('#user-form [name="permissions"]')
+      .forEach((input) => {
+        input.checked = defaults.includes(input.value);
+      });
+  });
   $("#user-form").addEventListener("submit", async (event) => {
     event.preventDefault();
     const button = event.submitter;

@@ -2,12 +2,25 @@ import { CLOUD_MODE } from "./config.js";
 import { cloudAuth } from "./cloud.js";
 import { authorizeRecovery } from "./recovery.js";
 import { transact } from "./case-storage.js";
-import { ROLES, requireRole, normalize } from "./workflow.js";
+import {
+  ROLES,
+  PERMISSIONS,
+  defaultPermissions,
+  requireRole,
+  normalize,
+} from "./workflow.js";
 import { validEmail } from "./utils.js";
 let currentUser = null;
 let pendingUser = null;
 const ITERATIONS = 310000;
-const publicUser = ({ id, name, email, role, mustChangePassword = false, permissions = [] }) => ({
+const publicUser = ({
+  id,
+  name,
+  email,
+  role,
+  mustChangePassword = false,
+  permissions = defaultPermissions(role),
+}) => ({
   id,
   name,
   email,
@@ -66,7 +79,14 @@ const localAuth = {
     currentUser = null;
   },
   async create(
-    { name, email, password, role, permissions = [], temporary = false },
+    {
+      name,
+      email,
+      password,
+      role,
+      permissions = defaultPermissions(role),
+      temporary = false,
+    },
     first = false,
   ) {
     if (!first) requireRole(currentUser, "admin");
@@ -83,7 +103,9 @@ const localAuth = {
       email: normalize(email),
       role: first ? "admin" : role,
       mustChangePassword: !first && temporary,
-      permissions: first ? ["dashboard", "ingresos", "reparacion", "calidad", "settings"] : permissions,
+      permissions: first
+        ? ["dashboard", "ingresos", "reparacion", "calidad", "settings"]
+        : permissions,
       salt,
       hash,
     };
@@ -158,8 +180,20 @@ const localAuth = {
   },
   async setPermissions(id, permissions) {
     requireRole(currentUser, "admin");
+    if (id === currentUser.id)
+      throw new Error("No puedes cambiar tus propios permisos.");
+    if (
+      !Array.isArray(permissions) ||
+      permissions.some((key) => !(key in PERMISSIONS))
+    )
+      throw new Error("Permisos no válidos.");
     return transact("users", "readwrite", (store, done, fail) => {
-      const q = store.get(id); q.onsuccess = () => { if (!q.result) return fail(new Error("Usuario no encontrado.")); store.put({ ...q.result, permissions: [...new Set(permissions)] }); done(); };
+      const q = store.get(id);
+      q.onsuccess = () => {
+        if (!q.result) return fail(new Error("Usuario no encontrado."));
+        store.put({ ...q.result, permissions: [...new Set(permissions)] });
+        done();
+      };
     });
   },
   async resetPassword(email, password, confirmation, code) {

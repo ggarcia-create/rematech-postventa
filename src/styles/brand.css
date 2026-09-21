@@ -533,10 +533,81 @@
   }
   #users-list .user-row {
     display: grid;
-    grid-template-columns: 1fr 240px;
-    gap: 20px;
-    padding: 15px 0;
+    grid-template-columns: minmax(150px, 1fr) minmax(280px, 1.5fr);
+    gap: 16px;
+    padding: 16px 0;
+    align-items: start;
+  }
+  #users-list .user-identity {
+    padding-top: 8px;
+    overflow-wrap: anywhere;
+  }
+  #users-list .user-identity strong {
+    font-size: 13px;
+  }
+  #users-list .user-access select {
+    min-height: 34px;
+    padding: 7px 28px 7px 10px;
+    font-size: 12px;
+  }
+  #users-list .user-access button {
+    padding: 7px 11px;
+    font-size: 11px;
+    min-height: 32px;
+  }
+  #users-dialog .permission-toggles,
+  #users-dialog .permissions-fieldset {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    margin: 8px 0;
+  }
+  #users-dialog .permissions-fieldset {
+    grid-column: 1/-1;
+    padding: 10px;
+    border: 1px solid #e0e6e3;
+    border-radius: 10px;
+  }
+  #users-dialog .permissions-fieldset legend {
+    font-size: 12px;
+  }
+  #users-dialog .permission-toggles label,
+  #users-dialog .permissions-fieldset label {
+    display: flex;
     align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 7px 9px;
+    border: 1px solid #e0e6e3;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  #users-dialog .permission-toggles label:has(input:checked),
+  #users-dialog .permissions-fieldset label:has(input:checked) {
+    background: #e8faf3;
+    border-color: #7ccfb2;
+  }
+  #users-dialog .permission-toggles input,
+  #users-dialog .permissions-fieldset input {
+    width: 14px;
+    height: 14px;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    flex: 0 0 14px;
+    accent-color: #009d73;
+  }
+  #users-list .user-access-status {
+    font-size: 11px;
+    line-height: 1.4;
+    color: #526d62;
+    margin: 6px 0;
+  }
+  #users-list .reset-user {
+    background: transparent;
+    color: #576675;
   }
   #users-list select {
     margin-bottom: 5px;
@@ -584,8 +655,25 @@
   }
 }
 
-#update-dialog { max-width: 520px; width: calc(100vw - 48px); padding: 28px; border: 1px solid #dae2df; border-radius: 20px; color: #10203a; }
-#update-dialog::backdrop { background: #10203a66; }
-#update-dialog p { line-height: 1.6; }
-#update-progress { width: 100%; accent-color: #00d99b; }
-#check-updates.update-available { background: #00d99b; color: #10203a; }
+#update-dialog {
+  max-width: 520px;
+  width: calc(100vw - 48px);
+  padding: 28px;
+  border: 1px solid #dae2df;
+  border-radius: 20px;
+  color: #10203a;
+}
+#update-dialog::backdrop {
+  background: #10203a66;
+}
+#update-dialog p {
+  line-height: 1.6;
+}
+#update-progress {
+  width: 100%;
+  accent-color: #00d99b;
+}
+#check-updates.update-available {
+  background: #00d99b;
+  color: #10203a;
+}

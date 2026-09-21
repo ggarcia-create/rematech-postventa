@@ -5,7 +5,9 @@ test("login, sidebar, administration and bad password", async ({ page }) => {
   await setup(page);
   await expect(page.locator("[data-route]")).toHaveCount(4);
   await page.locator('[data-route="dashboard"]').click();
-  await expect(page.locator("#view-dashboard")).toContainText("próxima etapa");
+  await expect(page.locator("#view-dashboard")).toContainText(
+    "Ventas manuales por mes",
+  );
   await page.locator("#manage-users").click();
   await page.locator('#user-form [name="name"]').fill("Técnico de prueba");
   await page.locator('#user-form [name="email"]').fill("tecnico@rematech.test");
@@ -183,7 +185,7 @@ test("repository blocks wrong roles, duplicate transitions, and stale writes", a
           record.revision,
           action,
           {},
-          { ...user, role },
+          { ...user, role, permissions: ["dashboard", role] },
         );
       } catch (e) {
         errors.push(e.message);

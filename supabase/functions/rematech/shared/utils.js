@@ -25,6 +25,10 @@ export function newDraft() {
     date: localDate(),
     origin: "Mercado Libre",
     intakeType: "Servicio",
+    resolution: "",
+    partialRefundPercent: "",
+    salePrice: "",
+    total: "",
     responsible: "",
     client: "",
     order: "",
@@ -50,7 +54,9 @@ export function validate(draft, kind) {
     "client",
     "equipment",
     "description",
-    ...(kind === "repair" ? ["serial"] : []),
+    ...(kind === "repair" && draft.intakeType !== "Devolución"
+      ? ["serial"]
+      : []),
   ];
   const errors = keys
     .filter((k) => !draft[k]?.trim())
@@ -60,6 +66,16 @@ export function validate(draft, kind) {
     !["Servicio", "Cambio", "Devolución"].includes(draft.intakeType)
   )
     errors.push("Selecciona un tipo de ingreso válido.");
+  if (
+    draft.intakeType === "Devolución" &&
+    draft.resolution === "Cerrado con reembolso parcial"
+  ) {
+    const percent = Number(draft.partialRefundPercent);
+    if (!Number.isFinite(percent) || percent <= 0 || percent > 100)
+      errors.push("Indica un porcentaje de reembolso parcial entre 1 y 100.");
+  }
+  if (draft.salePrice !== "" && Number(draft.salePrice) < 0)
+    errors.push("El precio de venta no puede ser negativo.");
   if (draft.description.length > 1500)
     errors.push("El motivo específico admite hasta 1500 caracteres.");
   if (kind === "repair") {

@@ -41,8 +41,23 @@ export const normalizeResult = (value) =>
   "";
 export const goesToQuality = (result) =>
   ["Reparado", "Sin falla detectada"].includes(normalizeResult(result));
+export const PERMISSIONS = {
+  dashboard: "Dashboard",
+  ingresos: "Ingresos",
+  reparacion: "Reparación",
+  calidad: "Calidad",
+};
+export const defaultPermissions = (role) =>
+  role === "admin"
+    ? Object.keys(PERMISSIONS)
+    : ["dashboard", role].filter((key) => key in PERMISSIONS);
 export const can = (user, role) =>
-  Boolean(user && (user.role === "admin" || user.role === role));
+  Boolean(
+    user &&
+    (user.role === "admin" ||
+      (role !== "admin" &&
+        (user.permissions ?? defaultPermissions(user.role)).includes(role))),
+  );
 export const normalize = (value) =>
   String(value || "")
     .trim()
@@ -89,7 +104,12 @@ export function normalizeRecord(record) {
   r.comments ??= [];
   r.notifications ??= [];
   r.qualityReviews ??= [];
-  r.returnResolution ??= r.intake?.intakeType === "Devolución" ? "En proceso de devolución" : "";
+  r.returnResolution ??=
+    r.intake?.intakeType === "Devolución"
+      ? r.intake.resolution || "En proceso de devolución"
+      : "";
+  if (r.intake?.intakeType === "Devolución")
+    r.intake.resolution = r.returnResolution;
   return r;
 }
 export function requireRole(user, role) {
@@ -218,21 +238,36 @@ export function applyAction(record, action, payload, user) {
   const r = normalizeRecord(record);
   let description;
   if (action === "update-return") {
-    if (r.intake?.intakeType !== "Devolución") throw new Error("Este expediente no es una devolución.");
+    if (r.intake?.intakeType !== "Devolución")
+      throw new Error("Este expediente no es una devolución.");
     requireRole(user, "admin");
-    if (!RETURN_RESOLUTIONS.includes(payload.resolution)) throw new Error("Selecciona un estado de devolución válido.");
+    if (!RETURN_RESOLUTIONS.includes(payload.resolution))
+      throw new Error("Selecciona un estado de devolución válido.");
     r.returnResolution = payload.resolution;
+    r.intake.resolution = payload.resolution;
     description = `Estado de devolución actualizado: ${payload.resolution}`;
     notify(r, user, ["admin", "ingresos"], description);
   } else if (action === "update-intake") {
     requireRole(user, "admin");
-    if (payload.serial !== undefined) r.intake.serial = String(payload.serial || "").trim();
+    if (payload.serial !== undefined) {
+      if (
+        typeof payload.serial !== "string" ||
+        payload.serial.trim().length > 200
+      )
+        throw new Error("El número de serie admite hasta 200 caracteres.");
+      r.intake.serial = payload.serial.trim();
+    }
     if (payload.resolution !== undefined) {
+      if (
+        payload.resolution !== "" &&
+        !RETURN_RESOLUTIONS.includes(payload.resolution)
+      )
+        throw new Error("Selecciona una resolución válida.");
       r.intake.resolution = String(payload.resolution || "").trim();
-      if (r.intake.intakeType === "Devolución" && RETURN_RESOLUTIONS.includes(r.intake.resolution)) r.returnResolution = r.intake.resolution;
+      if (r.intake.intakeType === "Devolución")
+        r.returnResolution = r.intake.resolution || "En proceso de devolución";
     }
     description = "Administrador actualizó número de serie y resolución";
-    r.history.push(audit(user, description, r.status));
     notify(r, user, ["admin", "ingresos", "reparacion"], description);
   } else if (action === "receive") {
     requireRole(user, "reparacion");

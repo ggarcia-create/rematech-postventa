@@ -54,7 +54,9 @@ export function validate(draft, kind) {
     "client",
     "equipment",
     "description",
-    ...(kind === "repair" ? ["serial"] : []),
+    ...(kind === "repair" && draft.intakeType !== "Devolución"
+      ? ["serial"]
+      : []),
   ];
   const errors = keys
     .filter((k) => !draft[k]?.trim())
@@ -64,7 +66,10 @@ export function validate(draft, kind) {
     !["Servicio", "Cambio", "Devolución"].includes(draft.intakeType)
   )
     errors.push("Selecciona un tipo de ingreso válido.");
-  if (draft.intakeType === "Devolución" && draft.resolution === "Cerrado con reembolso parcial") {
+  if (
+    draft.intakeType === "Devolución" &&
+    draft.resolution === "Cerrado con reembolso parcial"
+  ) {
     const percent = Number(draft.partialRefundPercent);
     if (!Number.isFinite(percent) || percent <= 0 || percent > 100)
       errors.push("Indica un porcentaje de reembolso parcial entre 1 y 100.");
