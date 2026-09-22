@@ -1,4 +1,4 @@
-import { validate, localDate } from "./utils.js";
+import { validate, localDate, intakeTotal } from "./utils.js";
 import { CATALOG } from "./catalog.js";
 export const ROLES = {
   admin: "Administrador",
@@ -156,7 +156,11 @@ export function createCase(intake, evidence, user) {
   return {
     id: crypto.randomUUID(),
     folioKey: normalize(intake.folio),
-    intake: structuredClone(intake),
+    intake: {
+      ...structuredClone(intake),
+      quantity: Number(intake.quantity ?? 1),
+      total: intakeTotal(intake),
+    },
     evidence,
     status: "pendiente",
     revision: 1,

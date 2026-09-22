@@ -300,85 +300,129 @@
             class="workspace"
             hidden
           >
-            <aside class="capture">
-              <div class="panel-heading">
-                <div class="eyebrow">SERVICIO POSTVENTA · REMATECH</div>
-                <h1>Nuevo ingreso</h1>
-                <p>
-                  Captura los datos del equipo. Revisa sus documentos y registra
-                  el expediente.
-                </p>
-                <div
-                  class="intake-shortcuts"
-                  role="group"
-                  aria-label="Secciones de Ingresos"
+            <aside class="capture intake-sheet">
+              <div
+                class="intake-shortcuts"
+                role="group"
+                aria-label="Vistas previas"
+              >
+                <button
+                  type="button"
+                  id="tab-ticket"
+                  class="document-jump active"
+                  aria-pressed="true"
                 >
-                  <a href="#intake-form">01 · Capturar ingreso</a>
-                  <button
-                    type="button"
-                    id="tab-ticket"
-                    class="document-jump active"
-                    aria-pressed="true"
-                  >
-                    02 · Ticket del cliente
-                  </button>
-                  <button
-                    type="button"
-                    id="tab-repair"
-                    class="document-jump"
-                    aria-pressed="false"
-                  >
-                    03 · Requisición de Reparación
-                  </button>
-                </div>
+                  Vista previa · Ticket
+                </button>
+                <button
+                  type="button"
+                  id="tab-repair"
+                  class="document-jump"
+                  aria-pressed="false"
+                >
+                  Vista previa · Requisición
+                </button>
               </div>
               <form id="intake-form" novalidate>
-                <section class="form-section">
-                  <h2><span>01</span> Datos del pedido y equipo</h2>
-                  <div class="fields">
-                    <label class="full"
-                      >Folio
-                      <div class="input-action">
-                        <input name="folio" id="folio" maxlength="60" /><button
-                          type="button"
-                          id="generate-folio"
-                          title="Generar nuevo folio"
-                        >
-                          ↻ Generar
-                        </button>
-                      </div></label
-                    ><label
-                      >Fecha<input type="date" name="date" id="date" /></label
-                    ><label
-                      >Canal de origen<select name="origin" id="origin">
+                <header class="intake-heading">
+                  <div>
+                    <h1>Nuevo ingreso</h1>
+                    <p>Captura los datos solicitados.</p>
+                  </div>
+                  <img
+                    class="intake-logo"
+                    src="/assets/rematech-logo.png"
+                    alt="Rematech"
+                  />
+                  <label class="intake-folio"
+                    >Folio
+                    <div class="input-action">
+                      <input name="folio" id="folio" maxlength="60" /><button
+                        type="button"
+                        id="generate-folio"
+                        title="Generar nuevo folio"
+                        aria-label="Generar nuevo folio"
+                      >
+                        ↻
+                      </button>
+                    </div></label
+                  >
+                </header>
+                <section
+                  class="form-section order-section"
+                  aria-labelledby="order-heading"
+                >
+                  <h2 id="order-heading">Información del pedido y equipo</h2>
+                  <div class="order-fields">
+                    <label
+                      >Fecha<input type="date" name="date" id="date"
+                    /></label>
+                    <label
+                      >Canal<select name="origin" id="origin">
                         <option>Mercado Libre</option>
+                        <option>Shopify</option>
+                        <option>Coppel</option>
+                        <option>Amazon</option>
                         <option>Rematech.mx</option>
                         <option>Jilotepec</option>
                         <option>Xonacatlán</option>
                         <option>Atlacomulco</option>
                         <option>Otro</option>
                       </select></label
-                    ><label class="full"
-                      >Tipo de ingreso<select
-                        name="intakeType"
-                        id="intake-type"
-                      >
-                        <option>Servicio</option>
-                        <option>Cambio</option>
-                        <option>Devolución</option>
-                      </select></label
-                    ><label class="full"
-                      >Resolución / estatus<select
-                        name="resolution"
-                        id="resolution"
-                      >
+                    >
+                    <label
+                      >Número de pedido<input
+                        name="order"
+                        id="order"
+                        maxlength="100"
+                        placeholder="Número de pedido"
+                    /></label>
+                    <label
+                      >Número de serie / SN<input
+                        name="serial"
+                        id="serial"
+                        maxlength="100"
+                        placeholder="Serie del equipo"
+                    /></label>
+                    <label
+                      >Equipo <b>*</b
+                      ><input
+                        name="equipment"
+                        id="equipment"
+                        maxlength="180"
+                        placeholder="Marca y modelo"
+                    /></label>
+                    <label
+                      >Cantidad <b>*</b
+                      ><input
+                        name="quantity"
+                        id="quantity"
+                        type="number"
+                        min="1"
+                        max="9999"
+                        step="1"
+                        value="1"
+                    /></label>
+                    <label
+                      >Precio de venta<input
+                        name="salePrice"
+                        id="sale-price"
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        placeholder="$0.00"
+                      /><small>Por equipo · MXN</small></label
+                    >
+                    <label
+                      >Resolución<select name="resolution" id="resolution">
                         <option value="">Pendiente de resolución</option>
                         <option>En proceso de devolución</option>
                         <option>Cerrado a favor de Rematech</option>
                         <option>Cerrado con reembolso al comprador</option>
                         <option>Cerrado con reembolso parcial</option>
                       </select></label
-                    ><label id="partial-refund-field" hidden
+                    >
+                    <label id="partial-refund-field" hidden
                       >Reembolso parcial (%)<select
                         name="partialRefundPercent"
                         id="partial-refund-percent"
@@ -396,137 +440,123 @@
                         <option>80</option>
                         <option>90</option>
                       </select></label
-                    ><label
-                      >Precio de venta (valor comercial)<input
-                        name="salePrice"
-                        id="sale-price"
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        placeholder="$0.00" /></label
-                    ><label
+                    >
+                    <label class="intake-total"
                       >Total<input
                         name="total"
                         id="total"
                         type="number"
                         readonly
-                        placeholder="$0.00" /></label
-                    ><label class="full"
+                        placeholder="$0.00"
+                      /><small id="total-help"
+                        >Cantidad × precio de venta · MXN</small
+                      ></label
+                    >
+                  </div>
+                  <div class="intake-context">
+                    <label
+                      >Tipo de ingreso<select
+                        name="intakeType"
+                        id="intake-type"
+                      >
+                        <option>Servicio</option>
+                        <option>Cambio</option>
+                        <option>Devolución</option>
+                      </select></label
+                    >
+                    <label
                       >Responsable<input
                         name="responsible"
                         id="responsible"
                         maxlength="120"
-                        placeholder="Nombre de quien recibe" /></label
-                    ><label
-                      >Número de pedido<input
-                        name="order"
-                        id="order"
-                        maxlength="100"
-                        placeholder="Ej. 200001234567" /></label
-                    ><label
-                      >Número de serie / SN<input
-                        name="serial"
-                        id="serial"
-                        maxlength="100"
-                        placeholder="Serie del equipo" /></label
-                    ><label class="full"
-                      >Equipo <b>*</b
-                      ><input
-                        name="equipment"
-                        id="equipment"
-                        maxlength="180"
-                        placeholder="Marca, modelo y características"
+                        placeholder="Nombre de quien recibe"
                     /></label>
                   </div>
                 </section>
-                <section class="form-section">
-                  <h2><span>02</span> Datos del cliente</h2>
-                  <div class="fields">
-                    <label class="full"
-                      >Nombre del cliente <b>*</b
-                      ><input
-                        name="client"
-                        id="client"
-                        maxlength="160"
-                        placeholder="Nombre completo" /></label
-                    ><label class="full"
-                      >Correo del cliente<input
-                        name="clientEmail"
-                        id="client-email"
-                        type="email"
-                        maxlength="254"
-                        autocomplete="email"
-                        placeholder="cliente@correo.com"
-                    /></label>
+                <section
+                  class="form-section technical-section"
+                  aria-labelledby="technical-heading"
+                >
+                  <h2 id="technical-heading">Falla técnica</h2>
+                  <div class="technical-layout">
+                    <div class="technical-capture">
+                      <div class="report-fields">
+                        <label
+                          >Motivo de reclamo<select id="reason" name="reason">
+                            <option>No funciona</option>
+                            <option>Dañado</option>
+                            <option>Producto diferente</option>
+                            <option>Incompleto</option>
+                            <option>Arrepentimiento</option>
+                          </select></label
+                        >
+                        <label
+                          >Falla reportada por el cliente <b>*</b
+                          ><textarea
+                            name="description"
+                            id="description"
+                            maxlength="1500"
+                            rows="2"
+                            placeholder="Describe la falla reportada…"
+                          ></textarea
+                          ><small id="character-count">0 / 1500</small></label
+                        >
+                      </div>
+                      <div id="components"></div>
+                      <button
+                        type="button"
+                        class="add-component"
+                        id="add-component"
+                      >
+                        + Agregar componente
+                      </button>
+                      <details class="request-options">
+                        <summary>Solicitud al área técnica</summary>
+                        <div id="requests"></div>
+                      </details>
+                    </div>
+                    <div class="intake-evidence">
+                      <h3>Evidencias <small>Máximo 2</small></h3>
+                      <div class="evidence-grid" id="evidence"></div>
+                    </div>
+                  </div>
+                  <div class="intake-submit">
+                    <button
+                      type="button"
+                      id="register-intake"
+                      class="primary register-intake"
+                    >
+                      Ingresar
+                    </button>
                   </div>
                 </section>
-                <section class="form-section">
-                  <h2><span>03</span> Falla reportada</h2>
+                <section
+                  class="form-section client-section"
+                  aria-labelledby="client-heading"
+                >
+                  <h2 id="client-heading">Información del cliente</h2>
                   <label
-                    >Motivo de reclamo<select id="reason" name="reason">
-                      <option>No funciona</option>
-                      <option>Dañado</option>
-                      <option>Producto diferente</option>
-                      <option>Incompleto</option>
-                      <option>Arrepentimiento</option>
-                    </select></label
-                  ><label class="description-label"
-                    >Motivo específico <b>*</b
-                    ><textarea
-                      name="description"
-                      id="description"
-                      maxlength="1500"
-                      rows="4"
-                      placeholder="Describe la falla tal como la reporta el cliente…"
-                    ></textarea>
-                  </label>
-                  <div class="field-foot">
-                    <span>Conserva el reporte original del cliente.</span
-                    ><span id="character-count">0 / 1500</span>
-                  </div>
-                </section>
-                <section class="form-section">
-                  <h2>
-                    <span>04</span> Clasificación técnica y evidencia
-                    <small>MANUAL</small>
-                  </h2>
-                  <p class="help">
-                    Selecciona un componente y todas sus fallas relacionadas.
-                  </p>
-                  <div id="components"></div>
-                  <button
-                    type="button"
-                    class="add-component"
-                    id="add-component"
-                  >
-                    + Agregar componente
+                    >Nombre <b>*</b
+                    ><input
+                      name="client"
+                      id="client"
+                      maxlength="160"
+                      placeholder="Nombre completo"
+                  /></label>
+                  <label
+                    >Correo<input
+                      name="clientEmail"
+                      id="client-email"
+                      type="email"
+                      maxlength="254"
+                      autocomplete="email"
+                      placeholder="cliente@correo.com"
+                  /></label>
+                  <button type="button" id="send-ticket" class="primary">
+                    Enviar ticket
                   </button>
-                  <details class="request-options">
-                    <summary>Solicitud al área técnica</summary>
-                    <div id="requests"></div>
-                  </details>
-                  <h3 class="evidence-subtitle">
-                    Evidencias del cliente <small>MÁX. 2</small>
-                  </h3>
-                  <div class="evidence-grid" id="evidence"></div>
-                  <p class="help">
-                    Solo se incluyen en la requisición. Compresión automática.
-                  </p>
                 </section>
               </form>
-              <footer class="capture-actions">
-                <button id="register-intake" class="primary register-intake">
-                  <span>REGISTRAR Y ENVIAR A REPARACIÓN</span
-                  ><small
-                    >Guardar expediente, entregar requisición y notificar al
-                    área</small
-                  >
-                </button>
-                <button id="send-ticket" class="primary">
-                  <span>↗ &nbsp; ENVIAR TICKET</span
-                  ><small>Al correo del cliente</small>
-                </button>
-              </footer>
             </aside>
             <section class="documents" id="intake-documents">
               <div class="document-heading">

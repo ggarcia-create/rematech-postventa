@@ -8,6 +8,7 @@ import "@fontsource/inter/800.css";
 import "../styles/styles.css";
 import { initializeWorkspace } from "./workspace.js";
 import "../styles/brand.css";
+import "../styles/intake.css";
 import { CATALOG, REQUESTS } from "./catalog.js";
 import { storage } from "./storage.js";
 import {
@@ -17,6 +18,7 @@ import {
   validate,
   validEmail,
   filename,
+  intakeTotal,
 } from "./utils.js";
 import { compressImage } from "./evidence.js";
 import { documentHTML } from "./documents.js";
@@ -64,16 +66,12 @@ function updateResolutionFields() {
   const partial = draft.resolution === "Cerrado con reembolso parcial";
   const field = $("#partial-refund-field");
   if (field) field.hidden = !partial;
-  const percent = Number(draft.partialRefundPercent);
-  const sale = Number(draft.salePrice);
-  const total =
-    partial && Number.isFinite(sale) && Number.isFinite(percent)
-      ? ((sale * percent) / 100).toFixed(2)
-      : Number.isFinite(sale)
-        ? sale.toFixed(2)
-        : "";
+  const total = intakeTotal(draft);
   draft.total = total;
   if ($("#total")) $("#total").value = total;
+  $("#total-help").textContent = partial
+    ? "Importe del reembolso · MXN"
+    : "Cantidad × precio de venta · MXN";
 }
 function components() {
   const selected = draft.components.map((c) => c.component);
@@ -89,7 +87,7 @@ function components() {
           )
           .join(
             "",
-          )}</select></label>${c.component ? `<details class="fault-dropdown"><summary>${e(c.faults.length === 1 ? c.faults[0] : c.faults.length ? `${c.faults.length} fallas seleccionadas` : "Selecciona las fallas")}</summary><div class="fault-menu">${CATALOG[c.component].map((f) => `<label><input type="checkbox" value="${e(f)}" ${c.faults.includes(f) ? "checked" : ""}>${e(f)}</label>`).join("")}</div></details><label class="other-fault" ${c.faults.some((f) => ["Otra falla", "Otro periférico"].includes(f)) ? "" : "hidden"}>Describe otra falla:<input class="other-input" maxlength="300" value="${e(c.other)}"></label>` : ""}</div>`,
+          )}</select></label>${c.component ? `<div class="fault-select"><span>Selecciona las fallas</span><details class="fault-dropdown"><summary>${e(c.faults.length === 1 ? c.faults[0] : c.faults.length ? `${c.faults.length} fallas seleccionadas` : "Selecciona las fallas")}</summary><div class="fault-menu">${CATALOG[c.component].map((f) => `<label><input type="checkbox" value="${e(f)}" ${c.faults.includes(f) ? "checked" : ""}>${e(f)}</label>`).join("")}</div></details></div><label class="other-fault" ${c.faults.some((f) => ["Otra falla", "Otro periférico"].includes(f)) ? "" : "hidden"}>Describe otra falla:<input class="other-input" maxlength="300" value="${e(c.other)}"></label>` : ""}</div>`,
     )
     .join("");
   $("#add-component").disabled =
@@ -139,7 +137,11 @@ $("#intake-form").addEventListener("input", (event) => {
   const { name, value } = event.target;
   if (name && Object.hasOwn(draft, name)) {
     draft[name] = value;
-    if (["resolution", "partialRefundPercent", "salePrice"].includes(name))
+    if (
+      ["resolution", "partialRefundPercent", "salePrice", "quantity"].includes(
+        name,
+      )
+    )
       updateResolutionFields();
     update();
   }

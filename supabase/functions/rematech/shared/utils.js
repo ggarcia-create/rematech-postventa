@@ -28,6 +28,7 @@ export function newDraft() {
     resolution: "",
     partialRefundPercent: "",
     salePrice: "",
+    quantity: 1,
     total: "",
     responsible: "",
     client: "",
@@ -41,6 +42,27 @@ export function newDraft() {
     requests: ["Diagnóstico general", "Validación de garantía"],
     ticketWidth: 80,
   };
+}
+export function intakeTotal(draft) {
+  const quantity = Number(draft.quantity ?? 1);
+  const price = Number(draft.salePrice);
+  if (
+    draft.salePrice === "" ||
+    draft.salePrice == null ||
+    !Number.isFinite(price) ||
+    price < 0 ||
+    !Number.isInteger(quantity) ||
+    quantity < 1 ||
+    quantity > 9999
+  )
+    return "";
+  const cents = Math.round((price + Number.EPSILON) * 100) * quantity;
+  if (draft.resolution === "Cerrado con reembolso parcial") {
+    const percent = Number(draft.partialRefundPercent);
+    if (!Number.isFinite(percent) || percent <= 0 || percent >= 100) return "";
+    return (Math.round((cents * percent) / 100) / 100).toFixed(2);
+  }
+  return (cents / 100).toFixed(2);
 }
 export function validate(draft, kind) {
   const labels = {
@@ -67,16 +89,24 @@ export function validate(draft, kind) {
     !["Servicio", "Cambio", "Devolución"].includes(draft.intakeType)
   )
     errors.push("Selecciona un tipo de ingreso válido.");
-  if (
-    draft.intakeType === "Devolución" &&
-    draft.resolution === "Cerrado con reembolso parcial"
-  ) {
+  if (draft.resolution === "Cerrado con reembolso parcial") {
     const percent = Number(draft.partialRefundPercent);
-    if (!Number.isFinite(percent) || percent <= 0 || percent > 100)
-      errors.push("Indica un porcentaje de reembolso parcial entre 1 y 100.");
+    if (!Number.isFinite(percent) || percent <= 0 || percent >= 100)
+      errors.push(
+        "Indica un porcentaje de reembolso parcial mayor a 0 y menor a 100.",
+      );
+    if (draft.salePrice === "" || draft.salePrice == null)
+      errors.push("Indica el precio de venta para calcular el reembolso.");
   }
-  if (draft.salePrice !== "" && Number(draft.salePrice) < 0)
-    errors.push("El precio de venta no puede ser negativo.");
+  if (
+    draft.salePrice != null &&
+    draft.salePrice !== "" &&
+    (!Number.isFinite(Number(draft.salePrice)) || Number(draft.salePrice) < 0)
+  )
+    errors.push("El precio de venta debe ser un importe válido y no negativo.");
+  const quantity = Number(draft.quantity ?? 1);
+  if (!Number.isInteger(quantity) || quantity < 1 || quantity > 9999)
+    errors.push("Indica una cantidad entera entre 1 y 9999.");
   if (draft.clientEmail?.trim() && !validEmail(draft.clientEmail.trim()))
     errors.push("Escribe un correo válido para el cliente.");
   if (draft.description.length > 1500)

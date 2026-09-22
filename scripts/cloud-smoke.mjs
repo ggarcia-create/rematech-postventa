@@ -132,6 +132,11 @@ try {
     equipment: "Equipo QA",
     serial: "QA-SN",
     description: "Prueba de flujo",
+    quantity: 2,
+    salePrice: "5672.11",
+    resolution: "Cerrado con reembolso parcial",
+    partialRefundPercent: "25",
+    total: "999999",
     components: [
       { component: "Batería / Carga", faults: ["No carga"], other: "" },
     ],
@@ -146,8 +151,11 @@ try {
   assert(created.ok, JSON.stringify(created.data));
   let r = created.data;
   caseIds.push(r.id);
+  assert.equal(r.intake.quantity, 2);
+  assert.equal(r.intake.total, "2836.06");
   const withImage = await call(repair, "get", { id: r.id });
   assert(withImage.ok);
+  assert.equal(withImage.data.intake.total, "2836.06");
   const storedImage = await fetch(withImage.data.evidence[0]);
   assert(storedImage.ok);
   assert.equal(

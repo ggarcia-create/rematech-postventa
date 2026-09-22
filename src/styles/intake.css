@@ -1,0 +1,378 @@
+@media screen {
+  #view-ingresos.workspace {
+    max-width: 1660px;
+    padding: 0 32px 32px;
+    background: #fff;
+  }
+  .intake-sheet {
+    color: #191b1b;
+  }
+  .intake-sheet .intake-shortcuts {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin: 0;
+    padding: 12px 0;
+    border-bottom: 1px solid #dbe0dd;
+  }
+  .intake-sheet .document-jump,
+  .intake-sheet button.primary {
+    background: #181b1b;
+    color: #fff;
+    border: 1px solid #181b1b;
+    border-radius: 5px;
+    min-height: 40px;
+    padding: 10px 22px;
+    font-size: 12px;
+  }
+  .intake-sheet .document-jump:hover,
+  .intake-sheet .document-jump.active,
+  .intake-sheet button.primary:hover {
+    background: #263d33;
+    border-color: #263d33;
+    color: #fff;
+  }
+  #intake-form {
+    display: block;
+  }
+  .intake-heading {
+    display: grid;
+    grid-template-columns: 1fr 1.1fr 1fr;
+    align-items: center;
+    gap: 25px;
+    padding: 18px 0 8px;
+  }
+  .intake-heading h1 {
+    font-size: 32px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    margin: 0 0 7px;
+  }
+  .intake-heading p {
+    font-size: 12px;
+    color: #69716d;
+  }
+  .intake-logo {
+    width: min(100%, 340px);
+    height: 88px;
+    object-fit: cover;
+    justify-self: center;
+  }
+  .intake-folio {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .intake-folio .input-action {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    gap: 4px;
+  }
+  .intake-folio button {
+    padding: 0 10px;
+    font-size: 20px;
+    border-radius: 4px;
+  }
+  .intake-sheet .form-section {
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 18px 0;
+    background: transparent;
+  }
+  .intake-sheet .form-section h2 {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: #202722;
+    margin: 0 0 22px;
+  }
+  .intake-sheet label {
+    color: #343b37;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1.1px;
+    min-width: 0;
+  }
+  .intake-sheet input,
+  .intake-sheet select,
+  .intake-sheet textarea,
+  .intake-sheet .fault-dropdown summary {
+    font-size: 12px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    color: #202722;
+    border-radius: 4px;
+    border-color: #bac3bd;
+    min-height: 40px;
+    padding: 10px;
+  }
+  .intake-sheet label small {
+    display: block;
+    color: #7d8881;
+    font-size: 9px;
+    font-weight: 400;
+    letter-spacing: 0;
+    text-transform: none;
+    margin-top: 5px;
+  }
+  .order-fields {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 18px 16px;
+  }
+  .intake-total {
+    grid-column: 5;
+  }
+  .intake-total input {
+    background: #f2faf6;
+    border-color: #74b596;
+    font-weight: 600;
+  }
+  .intake-context {
+    display: grid;
+    grid-template-columns: minmax(160px, 210px) minmax(180px, 300px);
+    gap: 16px;
+    margin-top: 12px;
+  }
+  .intake-context label {
+    font-size: 9px;
+    color: #748078;
+    letter-spacing: 0.5px;
+  }
+  .intake-context input,
+  .intake-context select {
+    min-height: 32px;
+    padding: 6px 10px;
+    font-size: 11px;
+    margin-top: 4px;
+    border-color: #dfe4e0;
+  }
+  .intake-sheet .technical-section {
+    border-top: 1px solid #e5e9e6;
+    margin-top: 4px;
+  }
+  .technical-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 44px;
+  }
+  .report-fields {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    align-items: start;
+  }
+  .intake-sheet textarea {
+    min-height: 40px;
+    height: 40px;
+  }
+  .intake-sheet #character-count {
+    text-align: right;
+  }
+  .intake-sheet #components {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-top: 14px;
+  }
+  .intake-sheet .component-block {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px 16px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  .intake-sheet .component-top {
+    grid-column: 1 / -1;
+    margin: 0;
+  }
+  .intake-sheet .component-block:first-child .component-top {
+    display: none;
+  }
+  .intake-sheet .fault-select > span {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 1.1px;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .intake-sheet .fault-dropdown {
+    margin-top: 7px;
+  }
+  .intake-sheet .fault-menu {
+    position: absolute;
+    top: 100%;
+  }
+  .intake-sheet .fault-menu label {
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+  }
+  .intake-sheet input[type="checkbox"] {
+    min-height: 0;
+    padding: 0;
+  }
+  .intake-sheet .other-fault {
+    grid-column: 1 / -1;
+  }
+  .intake-sheet .add-component {
+    padding: 7px;
+    min-height: 30px;
+    font-size: 10px;
+    border-color: #dfe4e0;
+    margin-top: 10px;
+  }
+  .intake-sheet .request-options {
+    margin: 10px 0 0;
+    font-size: 10px;
+  }
+  .intake-evidence {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 12px;
+    align-items: center;
+  }
+  .intake-evidence h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0;
+  }
+  .intake-evidence h3 small {
+    display: block;
+    font-size: 9px;
+    font-weight: 400;
+    color: #849087;
+    text-transform: none;
+    letter-spacing: 0;
+    margin-top: 6px;
+  }
+  .intake-evidence .evidence-grid {
+    gap: 16px;
+    margin: 0;
+  }
+  .intake-evidence .evidence-slot {
+    min-height: 140px;
+    border-radius: 5px;
+    background: #f7faf8;
+    border-color: #bfcfc4;
+  }
+  .intake-evidence .upload-label {
+    display: block;
+    padding: 24px 0;
+    text-transform: none;
+    letter-spacing: 0;
+    font-size: 12px;
+  }
+  .intake-submit {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .intake-submit button {
+    min-width: 180px;
+  }
+  .intake-sheet .client-section {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr 1fr 1fr;
+    gap: 18px;
+    align-items: end;
+    border-top: 1px solid #e5e9e6;
+    padding: 24px 0 28px;
+  }
+  .intake-sheet .client-section h2 {
+    align-self: center;
+    margin: 0;
+  }
+  .intake-sheet #send-ticket {
+    justify-self: end;
+    min-width: 160px;
+  }
+  #intake-documents {
+    margin-top: 18px;
+  }
+}
+@media screen and (max-width: 1180px) {
+  .intake-heading {
+    grid-template-columns: 1fr 1fr;
+  }
+  .intake-folio {
+    grid-column: 1 / -1;
+    justify-self: end;
+    width: 360px;
+  }
+  .order-fields {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .intake-total {
+    grid-column: auto;
+  }
+  .technical-layout {
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 24px;
+  }
+  .intake-evidence {
+    display: block;
+  }
+  .intake-evidence h3 {
+    margin-bottom: 12px;
+  }
+  .intake-sheet .client-section {
+    grid-template-columns: 1fr 1fr;
+  }
+  .intake-sheet .client-section h2 {
+    grid-column: 1 / -1;
+  }
+  .intake-sheet #send-ticket {
+    grid-column: 2;
+  }
+}
+@media screen and (max-width: 760px) {
+  #view-ingresos.workspace {
+    padding: 0 18px 24px;
+  }
+  .intake-heading {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .intake-logo {
+    grid-row: 1;
+    width: 220px;
+    height: 60px;
+  }
+  .intake-folio {
+    width: 100%;
+  }
+  .order-fields {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .technical-layout {
+    grid-template-columns: 1fr;
+  }
+  .intake-context {
+    grid-template-columns: 1fr 1fr;
+  }
+  .intake-sheet .intake-shortcuts {
+    flex-wrap: wrap;
+  }
+  .intake-sheet .document-jump {
+    flex: 1;
+    padding: 10px;
+  }
+  .intake-evidence {
+    display: block;
+  }
+  .intake-sheet .client-section {
+    grid-template-columns: 1fr;
+  }
+  .intake-sheet #send-ticket {
+    grid-column: 1;
+    justify-self: stretch;
+  }
+}

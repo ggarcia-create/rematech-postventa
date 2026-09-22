@@ -29,7 +29,7 @@ export const storage = {
     const d = JSON.parse(raw);
     if (d.version !== 1 || !Array.isArray(d.components))
       throw new Error("Borrador incompatible");
-    return { intakeType: "Servicio", ...d };
+    return { intakeType: "Servicio", quantity: 1, clientEmail: "", ...d };
   },
   saveDraft(draft) {
     localStorage.setItem(KEY, JSON.stringify(draft));

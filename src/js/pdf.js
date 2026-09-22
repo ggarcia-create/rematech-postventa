@@ -95,7 +95,7 @@ function ticketContent(pdf, d, logo) {
     ["Correo", d.clientEmail],
     ["Pedido", d.order],
     ["Tipo de ingreso", d.intakeType || "No especificado"],
-    ["Equipo", d.equipment],
+    ["Equipo", `${d.equipment || "—"} · Cantidad: ${d.quantity ?? 1}`],
     ["Número de serie", d.serial],
   ])
     w.text(`${k}: ${v || "—"}`, 8);
@@ -130,7 +130,7 @@ export async function generatePDF(d, kind, evidence = [null, null]) {
     w.text(`Folio: ${d.folio}     Fecha: ${displayDate(d.date)}`, 9);
     w.heading("01  DATOS DEL EQUIPO");
     for (const [k, v] of [
-      ["Equipo", d.equipment],
+      ["Equipo", `${d.equipment || "—"} · Cantidad: ${d.quantity ?? 1}`],
       ["Número de serie", d.serial],
       ["Pedido", d.order],
       [

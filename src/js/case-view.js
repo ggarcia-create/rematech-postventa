@@ -54,6 +54,7 @@ export function caseDetailHTML(r, user, images) {
   return `${adminIntake}${returnSection}<span class="status-badge ${r.status}">${STATUSES[r.status]}</span><div class="case-overview">${[
     ["Cliente", r.intake.client],
     ["Equipo", r.intake.equipment],
+    ["Cantidad", r.intake.quantity ?? 1],
     ["Número de serie", r.intake.serial],
     ["Pedido", r.intake.order],
     ["Origen", r.intake.origin],
