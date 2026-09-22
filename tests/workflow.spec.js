@@ -64,13 +64,15 @@ test("intake to repair to quality to completed, search and persistent history", 
     "ya está registrado",
   );
   // Clearing the intake must never delete the registered case.
+  await page.locator("#tab-ticket").click();
   await page.locator("#clear").click();
   await page.locator("#confirm-clear").click();
+  await page.locator("#close-preview").click();
   await page.locator("#logout").click();
   await login(page, "repair@rematech.test", "Repair-Test-2026");
   for (const query of [folio, "ped-200-abc", "sn-500-xyz"]) {
     await page.locator("#repair-search").fill(query);
-    await expect(page.locator("#repair-list tbody tr")).toHaveCount(1);
+    await expect(page.locator("#repair-list .case-card")).toHaveCount(1);
   }
   await page.locator("#repair-search").fill("no-existe");
   await expect(page.locator("#repair-list")).toContainText("Sin coincidencias");
@@ -259,7 +261,7 @@ test("recovery keeps the account and cases, rejects wrong codes, accepts the new
   await login(page, ADMIN.email, "New-Test-Password-2026");
   await expect(page.locator("#manage-users")).toBeVisible();
   await page.locator('[data-route="recepciones"]').click();
-  await expect(page.locator("#repair-list tbody tr")).toHaveCount(1);
+  await expect(page.locator("#repair-list .case-card")).toHaveCount(1);
   await page.locator("#logout").click();
   await page.locator("#open-recovery").click();
   await page.locator("#recovery-email").fill(ADMIN.email);

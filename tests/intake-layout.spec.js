@@ -16,6 +16,8 @@ test("intake is grouped, customer email persists, and both documents use the log
   await expect(page.locator(".ticket .document-logo")).toBeVisible();
   await expect(page.locator(".ticket")).toContainText("cliente@ejemplo.mx");
   await expect(page.locator(".ticket")).not.toContainText("FIRMA DEL CLIENTE");
+  await page.locator("#close-preview").click();
+  await expect(page.locator("#intake-documents")).toBeHidden();
   await page.locator("#tab-repair").click();
   await expect(page.locator(".repair .document-logo")).toBeVisible();
   await expect(page.locator("#selected-document")).toHaveText(

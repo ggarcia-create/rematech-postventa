@@ -558,13 +558,20 @@
                 </section>
               </form>
             </aside>
-            <section class="documents" id="intake-documents">
+            <dialog
+              class="documents preview-dialog"
+              id="intake-documents"
+              aria-labelledby="preview-title"
+            >
               <div class="document-heading">
                 <div>
                   <div class="eyebrow">DOCUMENTOS</div>
-                  <h2>Visualiza antes de entregar.</h2>
+                  <h2 id="preview-title">Visualiza antes de entregar.</h2>
                 </div>
-                <span class="live-badge">● Vista previa en vivo</span>
+                <div class="preview-heading-actions">
+                  <span class="live-badge">● Vista previa en vivo</span>
+                  <button type="button" id="close-preview">Cerrar</button>
+                </div>
               </div>
               <div class="document-toolbar">
                 <span id="selected-document">Ticket del cliente</span>
@@ -592,7 +599,7 @@
               <div class="preview-footer">
                 REMATECH MÉXICO <span>•</span> Gestión de servicio postventa
               </div>
-            </section>
+            </dialog>
           </section>
           <section
             id="view-recepciones"

@@ -278,11 +278,14 @@ function changeDocument(next) {
 }
 $("#tab-ticket").addEventListener("click", () => {
   changeDocument("ticket");
-  $("#intake-documents").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("#intake-documents").showModal();
 });
 $("#tab-repair").addEventListener("click", () => {
   changeDocument("repair");
-  $("#intake-documents").scrollIntoView({ behavior: "smooth", block: "start" });
+  $("#intake-documents").showModal();
+});
+$("#close-preview").addEventListener("click", () => {
+  if (!sending) $("#intake-documents").close();
 });
 $("#ticket-width").addEventListener("change", (event) => {
   draft.ticketWidth = Number(event.target.value);

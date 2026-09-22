@@ -221,7 +221,13 @@ function renderList(area) {
       matchesCase(r, query),
   );
   $(`#${area}-list`).innerHTML = data.length
-    ? `<div class="case-count">${data.length} expediente${data.length === 1 ? "" : "s"}</div><table class="case-table"><thead><tr><th>Folio / Cliente</th><th>Equipo / S/N</th><th>Pedido</th><th>Estado</th><th></th></tr></thead><tbody>${data.map((r) => `<tr><td><strong>${e(r.intake.folio)}</strong><small>${e(r.intake.client)}</small></td><td>${e(r.intake.equipment)}<small>S/N: ${e(r.intake.serial)}</small></td><td>${e(r.intake.order || "—")}</td><td>${badge(r.status)}</td><td><button data-open-case="${r.id}">Abrir expediente</button></td></tr>`).join("")}</tbody></table>`
+    ? `<div class="case-count"><span>${data.length} expediente${data.length === 1 ? "" : "s"}</span><small>Selecciona una tarjeta para consultar el expediente completo</small></div><div class="case-grid">${data
+        .map((r) => {
+          const received = r.status !== "pendiente";
+          const comments = r.comments?.length || 0;
+          return `<article class="case-card ${received ? "is-received" : ""}" data-case-card="${r.id}"><div class="case-card-face case-card-front"><div class="case-card-top"><span class="case-card-kicker">EXPEDIENTE</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Pedido</dt><dd>${e(r.intake.order || "—")}</dd></div><div><dt>Número de serie</dt><dd>${e(r.intake.serial || "Pendiente")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? "" : `data-open-case="${r.id}"`}>Abrir expediente</button></div></div><div class="case-card-face case-card-back"><div class="case-card-top"><span class="case-card-kicker">${received ? "INTERVENCIÓN REGISTRADA" : "PENDIENTE"}</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><dl><div><dt>Resultado</dt><dd>${e(r.technical?.result || r.intake.resolution || "Pendiente")}</dd></div><div><dt>Técnico</dt><dd>${e(r.technical?.technician || "Por asignar")}</dd></div><div><dt>Última actualización</dt><dd>${e(stamp(r.updatedAt))}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? `data-open-case="${r.id}"` : ""}>Ver expediente</button></div></div></article>`;
+        })
+        .join("")}</div>`
     : `<div class="empty-state"><div class="empty-icon">${quality ? "✓" : "▤"}</div><h2>${query ? "Sin coincidencias" : quality ? "No hay equipos en esta bandeja" : "No hay ingresos en esta consulta"}</h2><p>${query ? "Prueba con el folio, número de pedido o número de serie." : quality ? "Los equipos aparecerán aquí cuando Reparación los envíe a Calidad." : "Registra un ingreso para iniciar el seguimiento del equipo."}</p></div>`;
 }
 function renderLists() {
@@ -496,7 +502,9 @@ export async function initializeWorkspace(source) {
     $(`#${area}-filter`).addEventListener("change", () => renderList(area));
     $(`#${area}-list`).addEventListener("click", (event) => {
       const button = event.target.closest("[data-open-case]");
-      if (button) openCase(button.dataset.openCase);
+      const card = event.target.closest("[data-case-card]");
+      if (button || card)
+        openCase(button?.dataset.openCase || card.dataset.caseCard);
     });
   }
   $("#close-case").addEventListener("click", () => {

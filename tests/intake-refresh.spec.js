@@ -28,7 +28,7 @@ test("registration notice expires and new intakes clear stale repair filters", a
   await page.locator("#logout").click();
   await login(page);
   await page.locator('[data-route="recepciones"]').click();
-  await expect(page.locator("#repair-list tbody tr")).toHaveCount(2);
+  await expect(page.locator("#repair-list .case-card")).toHaveCount(2);
 });
 
 test("open repair tray receives new cases without navigation", async ({

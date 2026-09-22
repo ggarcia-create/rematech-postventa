@@ -19,7 +19,7 @@ async function battery(page) {
 }
 test.beforeEach(async ({ page }) => {
   await setup(page);
-  await expect(page.locator(".ticket")).toBeVisible();
+  await expect(page.locator("#intake-documents")).toBeHidden();
 });
 test("manual classification, duplicate prevention, other fault, deletion and autosave", async ({
   page,
@@ -71,8 +71,10 @@ test("ticket widths, escaped input, modal validation and demo sends", async ({
   await page.locator("#client").fill("<img src=x onerror=alert(1)>");
   await expect(page.locator(".ticket img.document-logo")).toHaveCount(1);
   await page.locator("#client").fill("María López");
+  await page.locator("#tab-ticket").click();
   await page.locator("#ticket-width").selectOption("58");
   await expect(page.locator(".ticket")).toHaveClass(/narrow/);
+  await page.locator("#close-preview").click();
   await page.locator("#send-ticket").click();
   await expect(page.locator("#send-dialog")).toBeVisible();
   await page.locator("#customer-email").fill("invalid");
@@ -197,6 +199,7 @@ test("PDF dimensions, text separation, evidence pagination and long content", as
   expect(pages(result.repair)).toBe(1);
   expect(pages(result.withImages)).toBe(2);
   expect(pages(result.long)).toBeGreaterThan(2);
+  await page.locator("#tab-ticket").click();
   const download = page.waitForEvent("download");
   await page.locator("#pdf").click();
   expect((await download).suggestedFilename()).toMatch(/^Ticket-RT-.*\.pdf$/);
