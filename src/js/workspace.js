@@ -1,4 +1,5 @@
 import { CLOUD_MODE } from "./config.js";
+import { openSales } from "./sales.js";
 import { notify, dismissNotice } from "./notice.js";
 import { caseDetailHTML, updateCaseControls } from "./case-view.js";
 import "../styles/workflow.css";
@@ -149,9 +150,6 @@ async function signIn() {
               : button.dataset.route,
           );
         });
-        $("#manual-sales-grid")
-          ?.querySelectorAll("input")
-          .forEach((input) => (input.disabled = user.role !== "admin"));
         await navigate(defaultRoute());
         await refreshNotifications();
         resolve();
@@ -179,6 +177,26 @@ async function navigate(next) {
     else button.removeAttribute("aria-current");
   });
   if (["recepciones", "calidad"].includes(route)) await refresh();
+  if (route === "dashboard") {
+    try {
+      const all = await cases.list();
+      $("#dashboard-cases").textContent = all.length;
+      $("#dashboard-repair").textContent = all.filter((item) =>
+        ["pendiente", "reparacion", "administracion"].includes(item.status),
+      ).length;
+      $("#dashboard-quality").textContent = all.filter(
+        (item) => item.status === "calidad",
+      ).length;
+      $("#dashboard-done").textContent = all.filter(
+        (item) => item.status === "finalizado",
+      ).length;
+    } catch (error) {
+      $("#dashboard-summary").setAttribute(
+        "aria-label",
+        `No se pudo cargar el resumen: ${error.message}`,
+      );
+    }
+  }
 }
 async function refresh() {
   if (!auth.user()) return;
@@ -552,6 +570,7 @@ export async function initializeWorkspace(source) {
   });
   $("#manage-users").addEventListener("click", async () => {
     try {
+      await openSales();
       await showUsers();
       $("#user-message").textContent = "";
       $("#users-dialog").showModal();

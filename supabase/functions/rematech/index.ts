@@ -127,6 +127,56 @@ Deno.serve(async (request) => {
       if (user.role !== "admin")
         throw new Error("Acción exclusiva del administrador.");
     };
+    if (input.action === "sales-get" || input.action === "sales-save") {
+      admin();
+      const salesBucket = db.storage.from("rematech-config");
+      const readSales = async () => {
+        const file = await salesBucket.download("manual-sales.json");
+        if (file.error) {
+          if (
+            String(file.error.message).includes("not found") ||
+            String(file.error.message).includes("Object not found")
+          )
+            return {};
+          throw file.error;
+        }
+        return JSON.parse(await file.data.text());
+      };
+      if (input.action === "sales-get")
+        return answer({ rows: await readSales() });
+      if (
+        typeof input.period !== "string" ||
+        !/^20\d{2}-(0[1-9]|1[0-2])$/.test(input.period)
+      )
+        throw new Error("Selecciona un mes y año válidos.");
+      const channels = ["Mercado Libre", "Shopify", "Coppel", "Amazon"];
+      if (
+        !input.values ||
+        typeof input.values !== "object" ||
+        Array.isArray(input.values) ||
+        Object.keys(input.values).sort().join("|") !==
+          channels.sort().join("|") ||
+        channels.some(
+          (channel) =>
+            !Number.isFinite(input.values[channel]) ||
+            input.values[channel] < 0 ||
+            input.values[channel] > 1e12 ||
+            Math.round(input.values[channel] * 100) !==
+              input.values[channel] * 100,
+        )
+      )
+        throw new Error("Ingresa importes válidos para los cuatro canales.");
+      const rows = await readSales();
+      rows[input.period] = input.values;
+      check(
+        await salesBucket.upload(
+          "manual-sales.json",
+          new Blob([JSON.stringify(rows)], { type: "application/json" }),
+          { upsert: true, contentType: "application/json" },
+        ),
+      );
+      return answer({ period: input.period, values: rows[input.period] });
+    }
     if (input.action === "users") {
       admin();
       return answer(
@@ -173,16 +223,14 @@ Deno.serve(async (request) => {
           email_confirm: true,
         }),
       ).user;
-      const saved = await db
-        .from("rematech_profiles")
-        .insert({
-          id: created.id,
-          name: name.trim(),
-          email: created.email,
-          role,
-          permissions: Array.isArray(permissions) ? permissions : [],
-          must_change_password: true,
-        });
+      const saved = await db.from("rematech_profiles").insert({
+        id: created.id,
+        name: name.trim(),
+        email: created.email,
+        role,
+        permissions: Array.isArray(permissions) ? permissions : [],
+        must_change_password: true,
+      });
       if (saved.error) {
         await db.auth.admin.deleteUser(created.id);
         throw new Error("No se pudo crear la cuenta.");
@@ -455,13 +503,11 @@ Deno.serve(async (request) => {
       );
       if (!note) throw new Error("Notificación no disponible.");
       check(
-        await db
-          .from("rematech_notification_reads")
-          .upsert({
-            user_id: user.id,
-            case_id: input.id,
-            notification_id: note.id,
-          }),
+        await db.from("rematech_notification_reads").upsert({
+          user_id: user.id,
+          case_id: input.id,
+          notification_id: note.id,
+        }),
       );
       return answer({ ok: true });
     }

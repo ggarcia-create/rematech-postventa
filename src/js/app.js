@@ -66,9 +66,12 @@ function updateResolutionFields() {
   if (field) field.hidden = !partial;
   const percent = Number(draft.partialRefundPercent);
   const sale = Number(draft.salePrice);
-  const total = partial && Number.isFinite(sale) && Number.isFinite(percent)
-    ? (sale * percent / 100).toFixed(2)
-    : (Number.isFinite(sale) ? sale.toFixed(2) : "");
+  const total =
+    partial && Number.isFinite(sale) && Number.isFinite(percent)
+      ? ((sale * percent) / 100).toFixed(2)
+      : Number.isFinite(sale)
+        ? sale.toFixed(2)
+        : "";
   draft.total = total;
   if ($("#total")) $("#total").value = total;
 }
@@ -136,7 +139,8 @@ $("#intake-form").addEventListener("input", (event) => {
   const { name, value } = event.target;
   if (name && Object.hasOwn(draft, name)) {
     draft[name] = value;
-    if (["resolution", "partialRefundPercent", "salePrice"].includes(name)) updateResolutionFields();
+    if (["resolution", "partialRefundPercent", "salePrice"].includes(name))
+      updateResolutionFields();
     update();
   }
   if (event.target.matches(".other-input")) {
@@ -259,17 +263,25 @@ function changeDocument(next) {
   kind = next;
   for (const tab of ["ticket", "repair"]) {
     $("#tab-" + tab).classList.toggle("active", tab === kind);
-    $("#tab-" + tab).setAttribute("aria-selected", String(tab === kind));
+    $("#tab-" + tab).setAttribute("aria-pressed", String(tab === kind));
   }
   $("#size-control").hidden = kind !== "ticket";
   $("#preview-label").textContent =
     kind === "ticket"
       ? "COMPROBANTE DE SERVICIO"
       : "CARTA · REQUISICIÓN INTERNA";
+  $("#selected-document").textContent =
+    kind === "ticket" ? "Ticket del cliente" : "Requisición de Reparación";
   preview();
 }
-$("#tab-ticket").addEventListener("click", () => changeDocument("ticket"));
-$("#tab-repair").addEventListener("click", () => changeDocument("repair"));
+$("#tab-ticket").addEventListener("click", () => {
+  changeDocument("ticket");
+  $("#intake-documents").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+$("#tab-repair").addEventListener("click", () => {
+  changeDocument("repair");
+  $("#intake-documents").scrollIntoView({ behavior: "smooth", block: "start" });
+});
 $("#ticket-width").addEventListener("change", (event) => {
   draft.ticketWidth = Number(event.target.value);
   update();
@@ -343,7 +355,7 @@ function openSend(next) {
     next === "ticket" ? "ENVIAR TICKET" : "ENVIAR REQUISICIÓN";
   $("#modal-content").innerHTML =
     next === "ticket"
-      ? `<div class="modal-file">Documento: <strong>${e(filename(next, draft.folio))}</strong><br>De: <strong>g.garcia@rematech.mx</strong><br>Asunto: <strong>${e(`Ticket de seguimiento - ${draft.folio}`)}</strong></div><label>Correo del cliente:<input type="email" id="customer-email" required autocomplete="email" placeholder="cliente@correo.com"></label>`
+      ? `<div class="modal-file">Documento: <strong>${e(filename(next, draft.folio))}</strong><br>De: <strong>g.garcia@rematech.mx</strong><br>Asunto: <strong>${e(`Ticket de seguimiento - ${draft.folio}`)}</strong></div><label>Correo del cliente:<input type="email" id="customer-email" required autocomplete="email" value="${e(draft.clientEmail || "")}" placeholder="cliente@correo.com"></label>`
       : `<div class="modal-file"><strong>${e(draft.folio)}</strong><br>${e(draft.equipment)}</div><p>Destino: <strong>Área de Reparación</strong><br>${e(REPAIR_EMAIL)}</p><p style="margin-top:16px">Se enviará:<br>✓ Requisición de servicio técnico${evidence.map((b, i) => (b ? `<br>✓ Evidencia del cliente ${i + 1}` : "")).join("")}</p>`;
   $("#send-status").textContent = DEMO_MODE
     ? "Modo demo: se simulará el envío; no se mandará ningún correo."
@@ -435,26 +447,5 @@ sidebar.querySelectorAll("[data-route]").forEach((button) => {
   button.addEventListener("click", () => setMenu(false));
 });
 
-import { initializeUpdater } from './updater.js';
+import { initializeUpdater } from "./updater.js";
 initializeUpdater();
-const salesKey = "rematech-manual-sales";
-function refreshManualSales() {
-  const month = $("#sales-month")?.value;
-  if (!month) return;
-  const data = JSON.parse(localStorage.getItem(salesKey) || "{}");
-  const row = data[month] || {};
-  document.querySelectorAll("[data-sales-channel]").forEach((input) => { input.value = row[input.dataset.salesChannel] || ""; });
-  const total = [...document.querySelectorAll("[data-sales-channel]")].reduce((sum, input) => sum + (Number(input.value) || 0), 0);
-  $("#manual-sales-total").textContent = `Total: $${total.toFixed(2)}`;
-}
-if ($("#sales-month")) {
-  refreshManualSales();
-  $("#sales-month").addEventListener("change", refreshManualSales);
-  $("#manual-sales-grid").addEventListener("input", () => {
-    const month = $("#sales-month").value;
-    const data = JSON.parse(localStorage.getItem(salesKey) || "{}");
-    data[month] = Object.fromEntries([...document.querySelectorAll("[data-sales-channel]")].map((input) => [input.dataset.salesChannel, Number(input.value) || 0]));
-    localStorage.setItem(salesKey, JSON.stringify(data));
-    refreshManualSales();
-  });
-}

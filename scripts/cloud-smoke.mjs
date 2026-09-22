@@ -42,6 +42,7 @@ async function request(path, body, headers = adminHeaders, method = "POST") {
 }
 const accounts = [],
   caseIds = [];
+const salesPeriod = "2099-12";
 const pass = `Test-${crypto.randomUUID()}`;
 async function make(role, temporary = false) {
   const email = `qa-${role}-${crypto.randomUUID()}@rematech.test`;
@@ -112,6 +113,18 @@ try {
   const mailProfile = (await call(admin, "profile")).data;
   assert.equal(typeof mailProfile.emailEnabled, "boolean");
   assert.equal(mailProfile.emailSender, "g.garcia@rematech.mx");
+  assert(!(await call(repair, "sales-get")).ok);
+  const initialSales = await call(admin, "sales-get");
+  assert(initialSales.ok, JSON.stringify(initialSales.data));
+  const qaSales = { "Mercado Libre": 100, Shopify: 25, Coppel: 10, Amazon: 5 };
+  assert(
+    (await call(admin, "sales-save", { period: salesPeriod, values: qaSales }))
+      .ok,
+  );
+  assert.deepEqual(
+    (await call(admin, "sales-get")).data.rows[salesPeriod],
+    qaSales,
+  );
   const { newDraft } = await import("../src/js/utils.js");
   const d = {
     ...newDraft(),
@@ -348,6 +361,22 @@ try {
     "PASS: four independent accounts, temporary password gate, cross-session registration, role guards, repair, rejection, notifications, completion, direct database denied.",
   );
 } finally {
+  const salesFile = await request(
+    "/storage/v1/object/rematech-config/manual-sales.json",
+    undefined,
+    adminHeaders,
+    "GET",
+  );
+  if (salesFile.ok && Object.hasOwn(salesFile.data, salesPeriod)) {
+    delete salesFile.data[salesPeriod];
+    const restored = await request(
+      "/storage/v1/object/rematech-config/manual-sales.json",
+      salesFile.data,
+      { ...adminHeaders, "x-upsert": "true" },
+      "PUT",
+    );
+    assert(restored.ok, JSON.stringify(restored.data));
+  }
   for (const id of caseIds) {
     await request(
       "/storage/v1/object/rematech-evidence",

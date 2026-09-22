@@ -5,6 +5,7 @@ import { faultNames } from "./documents.js";
 import { REQUESTS } from "./catalog.js";
 import { blobDataURL } from "./evidence.js";
 import { isTauri } from "@tauri-apps/api/core";
+import logoURL from "../assets/rematech-logo.png";
 // Text-based PDFs remain searchable, sharp, and paginate without cutting lines.
 function writer(
   pdf,
@@ -69,9 +70,20 @@ function writer(
     },
   };
 }
-function ticketContent(pdf, d) {
+function ticketContent(pdf, d, logo) {
   const w = writer(pdf, Number(d.ticketWidth), { margin: 5, paginate: false });
-  w.text("REMATECH", 20, true);
+  const logoSize = Number(d.ticketWidth) === 58 ? 38 : 48;
+  pdf.addImage(
+    logo,
+    "PNG",
+    (Number(d.ticketWidth) - logoSize) / 2,
+    0,
+    logoSize,
+    logoSize,
+    undefined,
+    "FAST",
+  );
+  w.y = logoSize - 6;
   w.text("RECEPCIÓN DE EQUIPO", 10, true);
   w.text("Comprobante de servicio", 8);
   w.rule();
@@ -80,6 +92,7 @@ function ticketContent(pdf, d) {
   w.heading("DATOS DEL CLIENTE");
   for (const [k, v] of [
     ["Cliente", d.client],
+    ["Correo", d.clientEmail],
     ["Pedido", d.order],
     ["Tipo de ingreso", d.intakeType || "No especificado"],
     ["Equipo", d.equipment],
@@ -91,29 +104,27 @@ function ticketContent(pdf, d) {
   w.text(d.description, 8);
   w.heading("DECLARACIÓN DE GARANTÍA");
   w.text(warranty(d.client), Number(d.ticketWidth) === 58 ? 7.5 : 8);
-  w.y += 15;
   w.rule();
-  w.text("FIRMA DEL CLIENTE", 8, true);
-  w.y += 4;
   w.text("REMATECH MÉXICO", 9, true);
   w.text("Conserva este comprobante para cualquier seguimiento.", 7);
   return w.y + 5;
 }
 export async function generatePDF(d, kind, evidence = [null, null]) {
   let pdf;
+  const logo = await blobDataURL(await (await fetch(logoURL)).blob());
   if (kind === "ticket") {
     const width = Number(d.ticketWidth);
     const probe = new jsPDF({ unit: "mm", format: [width, 3000] });
-    const height = ticketContent(probe, d);
+    const height = ticketContent(probe, d, logo);
     pdf = new jsPDF({
       unit: "mm",
       format: [width, Math.max(height, width + 1)],
     });
-    ticketContent(pdf, d);
+    ticketContent(pdf, d, logo);
   } else {
     pdf = new jsPDF({ unit: "mm", format: "letter" });
     const w = writer(pdf, 215.9);
-    w.text("REMATECH", 22, true);
+    pdf.addImage(logo, "PNG", 150, 0, 55, 55, undefined, "FAST");
     w.text("USO INTERNO · ÁREA DE REPARACIÓN", 8);
     w.text("REQUISICIÓN DE SERVICIO TÉCNICO", 14, true);
     w.text(`Folio: ${d.folio}     Fecha: ${displayDate(d.date)}`, 9);
@@ -225,7 +236,7 @@ export async function generatePDF(d, kind, evidence = [null, null]) {
     if (evidence.some(Boolean)) {
       pdf.addPage("letter");
       const a = writer(pdf, 215.9);
-      a.text("REMATECH", 22, true);
+      pdf.addImage(logo, "PNG", 150, 0, 55, 55, undefined, "FAST");
       a.text("EVIDENCIAS DEL CLIENTE", 15, true);
       a.text("Anexo de requisición técnica", 9);
       a.text(`Folio: ${d.folio}     Fecha: ${displayDate(d.date)}`, 9);

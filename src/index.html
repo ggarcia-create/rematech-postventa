@@ -272,38 +272,26 @@
           >
             <div class="eyebrow">REMATECH POSTVENTA</div>
             <h1>Dashboard</h1>
-            <div class="empty-state">
-              <div class="empty-icon">▦</div>
-              <h2>Ventas manuales por mes</h2>
-              <p>Captura valores por canal para completar tus indicadores.</p>
-              <div class="manual-sales-grid" id="manual-sales-grid">
-                ${["Mercado
-                Libre","Shopify","Coppel","Amazon"].map((channel)=>`<label
-                  >${channel}<input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    data-sales-channel="${channel}"
-                    placeholder="$0.00" /></label
-                >`).join("")}
+            <div
+              class="dashboard-summary"
+              id="dashboard-summary"
+              aria-live="polite"
+            >
+              <div>
+                <small>Expedientes registrados</small
+                ><strong id="dashboard-cases">—</strong>
               </div>
-              <label
-                >Mes<select id="sales-month">
-                  <option>Enero</option>
-                  <option>Febrero</option>
-                  <option>Marzo</option>
-                  <option>Abril</option>
-                  <option>Mayo</option>
-                  <option>Junio</option>
-                  <option>Julio</option>
-                  <option>Agosto</option>
-                  <option>Septiembre</option>
-                  <option>Octubre</option>
-                  <option>Noviembre</option>
-                  <option>Diciembre</option>
-                </select></label
-              >
-              <strong id="manual-sales-total">Total: $0.00</strong>
+              <div>
+                <small>En reparación</small
+                ><strong id="dashboard-repair">—</strong>
+              </div>
+              <div>
+                <small>Pendientes de Calidad</small
+                ><strong id="dashboard-quality">—</strong>
+              </div>
+              <div>
+                <small>Finalizados</small><strong id="dashboard-done">—</strong>
+              </div>
             </div>
           </section>
           <section
@@ -320,14 +308,33 @@
                   Captura los datos del equipo. Revisa sus documentos y registra
                   el expediente.
                 </p>
-                <div class="intake-shortcuts">
-                  <a href="#intake-form">01 · Capturar ingreso</a
-                  ><a href="#intake-documents">02 · Visualizar documentos ↓</a>
+                <div
+                  class="intake-shortcuts"
+                  role="group"
+                  aria-label="Secciones de Ingresos"
+                >
+                  <a href="#intake-form">01 · Capturar ingreso</a>
+                  <button
+                    type="button"
+                    id="tab-ticket"
+                    class="document-jump active"
+                    aria-pressed="true"
+                  >
+                    02 · Ticket del cliente
+                  </button>
+                  <button
+                    type="button"
+                    id="tab-repair"
+                    class="document-jump"
+                    aria-pressed="false"
+                  >
+                    03 · Requisición de Reparación
+                  </button>
                 </div>
               </div>
               <form id="intake-form" novalidate>
                 <section class="form-section">
-                  <h2><span>01</span> Datos del ingreso</h2>
+                  <h2><span>01</span> Datos del pedido y equipo</h2>
                   <div class="fields">
                     <label class="full"
                       >Folio
@@ -409,20 +416,7 @@
                         name="responsible"
                         id="responsible"
                         maxlength="120"
-                        placeholder="Nombre de quien recibe"
-                    /></label>
-                  </div>
-                </section>
-                <section class="form-section">
-                  <h2><span>02</span> Cliente y equipo</h2>
-                  <div class="fields">
-                    <label class="full"
-                      >Nombre del cliente <b>*</b
-                      ><input
-                        name="client"
-                        id="client"
-                        maxlength="160"
-                        placeholder="Nombre completo" /></label
+                        placeholder="Nombre de quien recibe" /></label
                     ><label
                       >Número de pedido<input
                         name="order"
@@ -446,7 +440,28 @@
                   </div>
                 </section>
                 <section class="form-section">
-                  <h2><span>03</span> Reporte del cliente</h2>
+                  <h2><span>02</span> Datos del cliente</h2>
+                  <div class="fields">
+                    <label class="full"
+                      >Nombre del cliente <b>*</b
+                      ><input
+                        name="client"
+                        id="client"
+                        maxlength="160"
+                        placeholder="Nombre completo" /></label
+                    ><label class="full"
+                      >Correo del cliente<input
+                        name="clientEmail"
+                        id="client-email"
+                        type="email"
+                        maxlength="254"
+                        autocomplete="email"
+                        placeholder="cliente@correo.com"
+                    /></label>
+                  </div>
+                </section>
+                <section class="form-section">
+                  <h2><span>03</span> Falla reportada</h2>
                   <label
                     >Motivo de reclamo<select id="reason" name="reason">
                       <option>No funciona</option>
@@ -472,7 +487,8 @@
                 </section>
                 <section class="form-section">
                   <h2>
-                    <span>04</span> Clasificación técnica <small>MANUAL</small>
+                    <span>04</span> Clasificación técnica y evidencia
+                    <small>MANUAL</small>
                   </h2>
                   <p class="help">
                     Selecciona un componente y todas sus fallas relacionadas.
@@ -489,11 +505,9 @@
                     <summary>Solicitud al área técnica</summary>
                     <div id="requests"></div>
                   </details>
-                </section>
-                <section class="form-section">
-                  <h2>
-                    <span>05</span> Evidencias del cliente <small>MÁX. 2</small>
-                  </h2>
+                  <h3 class="evidence-subtitle">
+                    Evidencias del cliente <small>MÁX. 2</small>
+                  </h3>
                   <div class="evidence-grid" id="evidence"></div>
                   <p class="help">
                     Solo se incluyen en la requisición. Compresión automática.
@@ -523,23 +537,7 @@
                 <span class="live-badge">● Vista previa en vivo</span>
               </div>
               <div class="document-toolbar">
-                <div role="tablist" aria-label="Documento">
-                  <button
-                    id="tab-ticket"
-                    role="tab"
-                    aria-selected="true"
-                    class="tab active"
-                  >
-                    Ticket cliente</button
-                  ><button
-                    id="tab-repair"
-                    role="tab"
-                    aria-selected="false"
-                    class="tab"
-                  >
-                    Requisición de Reparación
-                  </button>
-                </div>
+                <span id="selected-document">Ticket del cliente</span>
                 <div class="tools">
                   <button id="clear">Nuevo ingreso</button
                   ><button id="print">Imprimir</button
@@ -655,6 +653,82 @@
       <div class="eyebrow">ADMINISTRACIÓN</div>
       <h2 id="users-title">Configuración</h2>
       <p class="settings-intro">Usuarios y permisos</p>
+      <section class="sales-settings" aria-labelledby="sales-title">
+        <div class="sales-heading">
+          <div>
+            <h3 id="sales-title">Ventas manuales por mes</h3>
+            <p>
+              Captura el importe de cada canal para el periodo seleccionado.
+            </p>
+          </div>
+          <div class="sales-period">
+            <label
+              >Mes<select id="sales-month">
+                <option>Enero</option>
+                <option>Febrero</option>
+                <option>Marzo</option>
+                <option>Abril</option>
+                <option>Mayo</option>
+                <option>Junio</option>
+                <option>Julio</option>
+                <option>Agosto</option>
+                <option>Septiembre</option>
+                <option>Octubre</option>
+                <option>Noviembre</option>
+                <option>Diciembre</option>
+              </select></label
+            ><label
+              >Año<input
+                id="sales-year"
+                type="number"
+                min="2020"
+                max="2100"
+                step="1"
+            /></label>
+          </div>
+        </div>
+        <div class="manual-sales-grid" id="manual-sales-grid">
+          <label
+            >Mercado Libre<input
+              type="number"
+              min="0"
+              step="0.01"
+              data-sales-channel="Mercado Libre"
+              placeholder="$0.00"
+          /></label>
+          <label
+            >Shopify<input
+              type="number"
+              min="0"
+              step="0.01"
+              data-sales-channel="Shopify"
+              placeholder="$0.00"
+          /></label>
+          <label
+            >Coppel<input
+              type="number"
+              min="0"
+              step="0.01"
+              data-sales-channel="Coppel"
+              placeholder="$0.00"
+          /></label>
+          <label
+            >Amazon<input
+              type="number"
+              min="0"
+              step="0.01"
+              data-sales-channel="Amazon"
+              placeholder="$0.00"
+          /></label>
+        </div>
+        <div class="sales-actions">
+          <strong id="manual-sales-total">Total: $0.00</strong
+          ><span id="sales-status" role="status" aria-live="polite"></span
+          ><button id="save-manual-sales" type="button" class="primary">
+            Guardar ventas
+          </button>
+        </div>
+      </section>
       <div id="users-list"></div>
       <button id="open-local-import" type="button" hidden>
         Transferir expedientes locales

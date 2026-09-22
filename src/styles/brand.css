@@ -197,7 +197,8 @@
     gap: 10px;
     margin-top: 22px;
   }
-  .intake-shortcuts a {
+  .intake-shortcuts a,
+  .intake-shortcuts .document-jump {
     color: #101e37;
     text-decoration: none;
     border: 1px solid #ccd3d6;
@@ -207,7 +208,9 @@
     font-weight: 600;
     font-size: 12px;
   }
-  .intake-shortcuts a:hover {
+  .intake-shortcuts a:hover,
+  .intake-shortcuts .document-jump:hover,
+  .intake-shortcuts .document-jump.active {
     background: #e1fff1;
     border-color: #00b97c;
   }
@@ -215,7 +218,8 @@
     overflow: visible;
     padding: 0;
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-areas: "order client" "order report" "technical technical";
     gap: 18px;
     align-items: start;
     flex: auto;
@@ -239,8 +243,29 @@
     border-radius: 8px;
     padding: 7px;
   }
+  .form-section:nth-child(1) {
+    grid-area: order;
+  }
+  .form-section:nth-child(2) {
+    grid-area: client;
+  }
+  .form-section:nth-child(3) {
+    grid-area: report;
+  }
   .form-section:nth-child(4) {
-    grid-column: span 2;
+    grid-area: technical;
+  }
+  .evidence-subtitle {
+    margin: 22px 0 12px;
+    padding-top: 18px;
+    border-top: 1px solid #e3e8e5;
+    font-size: 13px;
+    color: #101e37;
+  }
+  .evidence-subtitle small {
+    color: #687a77;
+    font-size: 10px;
+    margin-left: 8px;
   }
   .form-section .fields {
     gap: 15px;
@@ -300,6 +325,28 @@
     border-radius: 13px;
     padding: 10px;
     border: 1px solid #d8dede;
+  }
+  #selected-document {
+    font-size: 13px;
+    font-weight: 700;
+    color: #101e37;
+  }
+  .document-logo {
+    display: block;
+    width: 162px;
+    height: 58px;
+    object-fit: cover;
+    object-position: center;
+    margin: 0 auto 5px;
+  }
+  .repair .document-logo {
+    margin-left: 0;
+    width: 185px;
+    height: 66px;
+  }
+  .ticket.narrow .document-logo {
+    width: 125px;
+    height: 48px;
   }
   .tab {
     padding: 12px 22px;
@@ -373,16 +420,26 @@
     padding: 24px;
   }
   #intake-form {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
+    grid-template-areas: "order" "client" "report" "technical";
   }
-  .form-section:nth-child(4) {
-    grid-column: auto;
-  }
-  .form-section:last-child {
-    grid-column: span 2;
+  .intake-shortcuts {
+    flex-wrap: wrap;
   }
   #components {
     grid-template-columns: 1fr;
+  }
+  .dashboard-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .sales-heading {
+    display: block;
+  }
+  .sales-period {
+    margin-top: 12px;
+  }
+  #users-dialog .manual-sales-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -521,7 +578,7 @@
     border-radius: 9px;
   }
   #users-dialog {
-    width: min(740px, 90vw);
+    width: min(820px, 94vw);
   }
   #users-title {
     font-size: 27px;
@@ -530,6 +587,95 @@
   .settings-intro {
     color: #6b7581;
     margin-bottom: 24px;
+  }
+  .sales-settings {
+    border: 1px solid #dde5e2;
+    border-radius: 15px;
+    background: #f8fbf9;
+    padding: 18px;
+    margin-bottom: 18px;
+  }
+  .sales-heading {
+    display: flex;
+    justify-content: space-between;
+    gap: 18px;
+    align-items: end;
+  }
+  .sales-heading h3 {
+    margin: 0 0 5px;
+    font-size: 15px;
+    color: #101e37;
+  }
+  .sales-heading p {
+    color: #667872;
+    font-size: 11px;
+  }
+  .sales-period {
+    display: grid;
+    grid-template-columns: 140px 90px;
+    gap: 8px;
+    flex: none;
+  }
+  #users-dialog .sales-period input,
+  #users-dialog .sales-period select {
+    min-height: 36px;
+    margin-top: 4px;
+  }
+  #users-dialog .manual-sales-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 16px;
+  }
+  #users-dialog .manual-sales-grid label {
+    background: white;
+    border: 1px solid #dce4df;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 11px;
+  }
+  #users-dialog .manual-sales-grid input {
+    min-height: 34px;
+    padding: 7px;
+    margin-top: 7px;
+  }
+  .sales-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .sales-actions strong {
+    margin-right: auto;
+    font-size: 13px;
+  }
+  #sales-status {
+    color: #526d62;
+    font-size: 11px;
+    text-align: right;
+  }
+  .dashboard-summary {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .dashboard-summary > div {
+    background: white;
+    border: 1px solid #dce4df;
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .dashboard-summary small {
+    display: block;
+    color: #65736f;
+    font-size: 12px;
+  }
+  .dashboard-summary strong {
+    display: block;
+    color: #101e37;
+    font-size: 32px;
+    margin-top: 16px;
   }
   #users-list .user-row {
     display: grid;

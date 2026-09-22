@@ -69,7 +69,7 @@ test("ticket widths, escaped input, modal validation and demo sends", async ({
   );
   await fill(page);
   await page.locator("#client").fill("<img src=x onerror=alert(1)>");
-  await expect(page.locator(".ticket img")).toHaveCount(0);
+  await expect(page.locator(".ticket img.document-logo")).toHaveCount(1);
   await page.locator("#client").fill("María López");
   await page.locator("#ticket-width").selectOption("58");
   await expect(page.locator(".ticket")).toHaveClass(/narrow/);
@@ -113,11 +113,11 @@ test("two compressed images persist, attach only to repair, remove and clear", a
     });
     await expect(page.locator(".evidence-slot img")).toHaveCount(i + 1);
   }
-  await expect(page.locator(".ticket img")).toHaveCount(0);
+  await expect(page.locator(".ticket img.document-logo")).toHaveCount(1);
   await page.locator("#tab-repair").click();
-  await expect(page.locator(".evidence-paper img")).toHaveCount(2);
+  await expect(page.locator(".evidence-paper figure img")).toHaveCount(2);
   const size = await page
-    .locator(".evidence-paper img")
+    .locator(".evidence-paper figure img")
     .first()
     .evaluate((img) => img.naturalWidth);
   expect(size).toBe(1600);
@@ -127,7 +127,7 @@ test("two compressed images persist, attach only to repair, remove and clear", a
   await page.locator('[data-remove="0"]').click();
   await expect(page.locator(".evidence-slot img")).toHaveCount(1);
   await page.locator("#tab-repair").click();
-  await expect(page.locator(".evidence-paper img")).toHaveCount(1);
+  await expect(page.locator(".evidence-paper figure img")).toHaveCount(1);
   await page.locator("#clear").click();
   await page.locator("#confirm-clear").click();
   await expect(page.locator(".evidence-slot img")).toHaveCount(0);
@@ -190,7 +190,10 @@ test("PDF dimensions, text separation, evidence pagination and long content", as
   expect(result.ticket80).toMatch(/\/MediaBox \[0 0 226\.77/);
   expect(result.ticket58).toMatch(/\/MediaBox \[0 0 164\.40/);
   expect(result.ticket80).not.toContain("Carga intermitente");
+  expect(result.ticket80).not.toContain("FIRMA DEL CLIENTE");
+  expect(result.ticket80).toContain("/Subtype /Image");
   expect(result.repair).toContain("Carga intermitente");
+  expect(result.repair).toContain("/Subtype /Image");
   expect(pages(result.repair)).toBe(1);
   expect(pages(result.withImages)).toBe(2);
   expect(pages(result.long)).toBeGreaterThan(2);

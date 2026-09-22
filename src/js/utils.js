@@ -31,6 +31,7 @@ export function newDraft() {
     total: "",
     responsible: "",
     client: "",
+    clientEmail: "",
     order: "",
     serial: "",
     equipment: "",
@@ -76,6 +77,8 @@ export function validate(draft, kind) {
   }
   if (draft.salePrice !== "" && Number(draft.salePrice) < 0)
     errors.push("El precio de venta no puede ser negativo.");
+  if (draft.clientEmail?.trim() && !validEmail(draft.clientEmail.trim()))
+    errors.push("Escribe un correo válido para el cliente.");
   if (draft.description.length > 1500)
     errors.push("El motivo específico admite hasta 1500 caracteres.");
   if (kind === "repair") {

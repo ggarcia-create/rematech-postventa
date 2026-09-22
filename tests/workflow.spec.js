@@ -6,7 +6,7 @@ test("login, sidebar, administration and bad password", async ({ page }) => {
   await expect(page.locator("[data-route]")).toHaveCount(4);
   await page.locator('[data-route="dashboard"]').click();
   await expect(page.locator("#view-dashboard")).toContainText(
-    "Ventas manuales por mes",
+    "Expedientes registrados",
   );
   await page.locator("#manage-users").click();
   await page.locator('#user-form [name="name"]').fill("Técnico de prueba");
