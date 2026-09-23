@@ -51,7 +51,10 @@ export function caseDetailHTML(r, user, images) {
   const reviews = r.qualityReviews.length
     ? `<section class="case-block"><h3>INSPECCIONES DE CALIDAD ANTERIORES</h3>${r.qualityReviews.map((q) => `<article class="quality-review ${q.decision}"><strong>${q.decision === "approved" ? "Inspección aprobada" : "Inspección no aprobada"}</strong><small>${e(q.reviewer)} · ${e(stamp(q.at))}</small>${q.notes ? `<p>${e(q.notes)}</p>` : ""}<details><summary>Diagnóstico revisado</summary><p>${e(q.technical?.diagnosis || "—")}</p><p>${e(q.technical?.actions || "—")}</p><p>Resultado: ${e(q.technical?.result || "—")}</p></details></article>`).join("")}</section>`
     : "";
-  return `${adminIntake}${returnSection}<span class="status-badge ${r.status}">${STATUSES[r.status]}</span><div class="case-overview">${[
+  const deleteAction = can(user, "admin")
+    ? '<div class="case-admin-actions"><button type="button" data-case-action="delete" class="danger">Eliminar expediente</button></div>'
+    : "";
+  return `${deleteAction}${adminIntake}${returnSection}<span class="status-badge ${r.status}">${STATUSES[r.status]}</span><div class="case-overview">${[
     ["Cliente", r.intake.client],
     ["Equipo", r.intake.equipment],
     ["Cantidad", r.intake.quantity ?? 1],

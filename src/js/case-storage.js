@@ -136,6 +136,15 @@ export const localCases = {
       q.onsuccess = () => done(decodeRecord(q.result));
     });
   },
+  remove(id, user) {
+    if (user?.role !== "admin")
+      return Promise.reject(new Error("Solo Administración puede borrar expedientes."));
+    return transact("cases", "readwrite", (store, done, fail) => {
+      const q = store.delete(id);
+      q.onerror = () => fail(new Error("No se pudo borrar el expediente."));
+      done({ ok: true });
+    });
+  },
   async register(intake, images, user) {
     const record = createCase(intake, images, user);
     record.evidence = await Promise.all(images.map(encodeImage));

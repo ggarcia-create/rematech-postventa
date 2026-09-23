@@ -122,6 +122,7 @@ export const cloudCases = {
     });
   },
   get: getCase,
+  remove: (id) => cloudCall("delete", { id }),
   async register(intake, evidence) {
     return cloudCall("register", {
       intake,

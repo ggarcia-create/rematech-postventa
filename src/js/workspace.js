@@ -30,6 +30,17 @@ const stamp = (value) =>
   });
 const badge = (status) =>
   `<span class="status-badge ${status}">${STATUSES[status]}</span>`;
+const resultClass = (record) => {
+  const result = String(record.technical?.result || record.intake?.resolution || "")
+    .toLocaleLowerCase("es-MX")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  if (result.includes("reparado") || result.includes("sin falla")) return "result-green";
+  if (result.includes("cambio")) return "result-purple";
+  if (result.includes("pieza")) return "result-yellow";
+  if (result.includes("procede garantia") || result.includes("no aplica garantia")) return "result-red";
+  return "";
+};
 const errorText = (id, error) => {
   $(id).textContent = error.message || String(error);
 };
@@ -229,6 +240,10 @@ function renderList(area) {
         })
         .join("")}</div>`
     : `<div class="empty-state"><div class="empty-icon">${quality ? "✓" : "▤"}</div><h2>${query ? "Sin coincidencias" : quality ? "No hay equipos en esta bandeja" : "No hay ingresos en esta consulta"}</h2><p>${query ? "Prueba con el folio, número de pedido o número de serie." : quality ? "Los equipos aparecerán aquí cuando Reparación los envíe a Calidad." : "Registra un ingreso para iniciar el seguimiento del equipo."}</p></div>`;
+  $(`#${area}-list`).querySelectorAll("[data-case-card]").forEach((card) => {
+    const record = records.find((item) => item.id === card.dataset.caseCard);
+    if (record) card.classList.add(resultClass(record));
+  });
 }
 function renderLists() {
   renderList("repair");
@@ -273,6 +288,16 @@ async function act(action) {
     .querySelectorAll("button")
     .forEach((button) => (button.disabled = true));
   try {
+    if (action === "delete") {
+      if (auth.user()?.role !== "admin")
+        throw new Error("Solo Administración puede borrar expedientes.");
+      if (!window.confirm(`¿Borrar el expediente ${selected.intake.folio}? Esta acción no se puede deshacer.`)) return;
+      await cases.remove(selected.id, auth.user());
+      closeCase();
+      await refresh();
+      notify("Expediente borrado correctamente.");
+      return;
+    }
     if (action === "pdf") {
       const blob = await generatePDF(
         {

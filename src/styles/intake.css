@@ -476,6 +476,14 @@
     box-shadow: 0 6px 18px #10203908;
     backface-visibility: visible;
   }
+  .case-card.result-green .case-card-front { background: #effbf3; border-color: #8bd6a8; }
+  .case-card.result-purple .case-card-front { background: #f6efff; border-color: #c8a9ec; }
+  .case-card.result-yellow .case-card-front { background: #fff9df; border-color: #e7c85d; }
+  .case-card.result-red .case-card-front { background: #fff0ef; border-color: #e7a19b; }
+  .case-card.result-green .case-card-back { background: #176b45; border-color: #176b45; }
+  .case-card.result-purple .case-card-back { background: #5e3b87; border-color: #5e3b87; }
+  .case-card.result-yellow .case-card-back { background: #7a5b00; border-color: #7a5b00; }
+  .case-card.result-red .case-card-back { background: #8b302b; border-color: #8b302b; }
   .case-card-face.case-card-back {
     display: none;
     background: #102039;
@@ -632,6 +640,26 @@
     border-color: #dce5df;
     background: #fff;
     padding: 22px;
+  }
+  .case-dialog #case-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .case-dialog .case-comments-section {
+    order: -10;
+    border: 2px solid #a248a8;
+    background: #fffaff;
+  }
+  .case-admin-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 4px;
+  }
+  .case-admin-actions .danger {
+    border-color: #d85b55;
+    color: #a62924;
+    background: #fff0ef;
   }
   .case-dialog .case-overview {
     padding: 20px;
