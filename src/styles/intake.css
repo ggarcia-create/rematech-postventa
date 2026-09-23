@@ -569,6 +569,7 @@
   .case-comments-count {
     font-weight: 700;
     color: #122039;
+    cursor: pointer;
   }
   .case-comments-count b {
     display: inline-grid;

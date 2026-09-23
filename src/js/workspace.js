@@ -247,6 +247,11 @@ function detail() {
     auth.user(),
     caseImages,
   );
+  const comments = $("#case-detail .case-comments-section");
+  const technical = $("#case-detail #technical-form")?.closest(".case-block");
+  if (comments) $("#case-detail").prepend(comments);
+  if (technical && selected.status !== "pendiente")
+    $("#case-detail").prepend(technical);
   updateCaseControls($("#case-detail"));
 }
 async function openCase(id) {
@@ -522,6 +527,10 @@ export async function initializeWorkspace(source) {
   $("#case-detail").addEventListener("click", (event) => {
     const button = event.target.closest("[data-case-action]");
     if (button) act(button.dataset.caseAction);
+  });
+  $("#case-comments-count").addEventListener("click", () => {
+    const section = $("#case-detail .case-comments-section");
+    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
   });
   $("#case-detail").addEventListener("change", (event) => {
     if (event.target.name === "faultLocations" && event.target.checked) {
