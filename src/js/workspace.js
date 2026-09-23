@@ -240,6 +240,8 @@ function detail() {
     blob ? URL.createObjectURL(blob) : null,
   );
   $("#case-title").textContent = selected.intake.folio;
+  $("#case-comments-count").innerHTML =
+    `Comentarios <b>${selected.comments?.length || 0}</b>`;
   $("#case-detail").innerHTML = caseDetailHTML(
     selected,
     auth.user(),
