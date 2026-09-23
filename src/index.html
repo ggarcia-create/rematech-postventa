@@ -225,6 +225,14 @@
           <div class="sidebar-bottom">
             <div id="session-user"></div>
             <button
+              id="open-suggestion"
+              aria-label="Proponer una mejora"
+              title="Proponer una mejora"
+            >
+              <span aria-hidden="true">?</span
+              ><b class="nav-label">Proponer mejora</b>
+            </button>
+            <button
               id="manage-users"
               aria-label="Configuración"
               title="Configuración"
@@ -771,6 +779,15 @@
           </button>
         </div>
       </section>
+      <section class="suggestions-admin" aria-labelledby="suggestions-title">
+        <h3 id="suggestions-title">Propuestas de mejora</h3>
+        <p class="help">
+          Revisa las ideas enviadas por el equipo y actualiza su estado.
+        </p>
+        <div id="suggestions-list">
+          <p class="help">Cargando propuestas…</p>
+        </div>
+      </section>
       <div id="users-list"></div>
       <button id="open-local-import" type="button" hidden>
         Transferir expedientes locales
@@ -833,6 +850,36 @@
         <div class="modal-actions">
           <button type="button" id="close-users">Cerrar</button
           ><button type="submit" class="primary">Crear usuario</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="suggestion-dialog" aria-labelledby="suggestion-title">
+      <form id="suggestion-form">
+        <div class="eyebrow">IDEAS DEL EQUIPO</div>
+        <h2 id="suggestion-title">Proponer una mejora</h2>
+        <p class="help">
+          Tu propuesta llegará al administrador para revisarla.
+        </p>
+        <label
+          >Título<input
+            name="title"
+            maxlength="160"
+            required
+            placeholder="Ej. Agregar filtro por cliente"
+        /></label>
+        <label
+          >Descripción<textarea
+            name="body"
+            rows="5"
+            maxlength="4000"
+            required
+            placeholder="Describe qué mejorarías y por qué sería útil."
+          ></textarea>
+        </label>
+        <p id="suggestion-message" role="status"></p>
+        <div class="modal-actions">
+          <button type="button" id="close-suggestion">Cerrar</button
+          ><button type="submit" class="primary">Enviar propuesta</button>
         </div>
       </form>
     </dialog>

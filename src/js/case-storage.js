@@ -53,6 +53,34 @@ export async function transact(store, mode, work) {
   });
 }
 export const localCases = {
+  createSuggestion(title, body, user) {
+    const key = "rematech.suggestions.v1";
+    const list = JSON.parse(localStorage.getItem(key) || "[]");
+    const suggestion = {
+      id: crypto.randomUUID(),
+      title,
+      body,
+      author_name: user.name,
+      status: "pendiente",
+      created_at: new Date().toISOString(),
+    };
+    list.unshift(suggestion);
+    localStorage.setItem(key, JSON.stringify(list));
+    return Promise.resolve(suggestion);
+  },
+  suggestions() {
+    return Promise.resolve(
+      JSON.parse(localStorage.getItem("rematech.suggestions.v1") || "[]"),
+    );
+  },
+  updateSuggestion(id, status) {
+    const key = "rematech.suggestions.v1",
+      list = JSON.parse(localStorage.getItem(key) || "[]");
+    const item = list.find((s) => s.id === id);
+    if (item) item.status = status;
+    localStorage.setItem(key, JSON.stringify(list));
+    return Promise.resolve(item);
+  },
   notifications(user) {
     if (!user) return Promise.resolve([]);
     return transact("cases", "readonly", (store, done) => {

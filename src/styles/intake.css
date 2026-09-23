@@ -1,4 +1,49 @@
 @media screen {
+  #open-suggestion {
+    color: #3ee69a;
+  }
+  #open-suggestion > span {
+    display: grid;
+    place-items: center;
+    width: 24px;
+    height: 24px;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    font-weight: 800;
+  }
+  .suggestions-admin {
+    margin: 24px 0;
+    padding: 20px;
+    border: 1px solid #dbe2dc;
+    border-radius: 22px;
+    background: #f7faf7;
+  }
+  .suggestion-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 14px 0;
+    border-top: 1px solid #dbe2dc;
+  }
+  .suggestion-row p {
+    margin: 6px 0;
+    color: #64736a;
+  }
+  .suggestion-row select {
+    min-width: 150px;
+    align-self: flex-start;
+  }
+  #suggestion-dialog {
+    width: min(520px, calc(100vw - 32px));
+    border: 0;
+    border-radius: 26px;
+    padding: 28px;
+    box-shadow: 0 24px 80px #10203935;
+  }
+  #suggestion-dialog::backdrop {
+    background: #10203968;
+    backdrop-filter: blur(8px);
+  }
   #view-ingresos.workspace {
     max-width: 1660px;
     padding: 0 32px 32px;

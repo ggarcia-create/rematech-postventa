@@ -423,8 +423,60 @@ async function showUsers(onlyUserId) {
     if (row) row.outerHTML = html;
   } else $("#users-list").innerHTML = html;
 }
+async function showSuggestions() {
+  if (auth.user()?.role !== "admin") return;
+  const list = await cases.suggestions();
+  $("#suggestions-list").innerHTML = list.length
+    ? list
+        .map(
+          (s) =>
+            `<article class="suggestion-row"><div><strong>${e(s.title)}</strong><p>${e(s.body)}</p><small>${e(s.author_name)} · ${stamp(s.created_at)}</small></div><select data-suggestion-id="${s.id}" aria-label="Estado de ${e(s.title)}"><option value="pendiente" ${s.status === "pendiente" ? "selected" : ""}>Pendiente</option><option value="en_revision" ${s.status === "en_revision" ? "selected" : ""}>En revisión</option><option value="implementada" ${s.status === "implementada" ? "selected" : ""}>Implementada</option><option value="descartada" ${s.status === "descartada" ? "selected" : ""}>Descartada</option></select></article>`,
+        )
+        .join("")
+    : '<p class="help">Todavía no hay propuestas.</p>';
+}
 export async function initializeWorkspace(source) {
   intakeSource = source;
+  $("#open-suggestion").addEventListener("click", () => {
+    $("#suggestion-form").reset();
+    $("#suggestion-message").textContent = "";
+    $("#suggestion-dialog").showModal();
+  });
+  $("#close-suggestion").addEventListener("click", () =>
+    $("#suggestion-dialog").close(),
+  );
+  $("#suggestion-form").addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const button = event.submitter;
+    button.disabled = true;
+    try {
+      const data = new FormData(event.target);
+      await cases.createSuggestion(
+        data.get("title"),
+        data.get("body"),
+        auth.user(),
+      );
+      event.target.reset();
+      $("#suggestion-message").textContent =
+        "Propuesta enviada al administrador.";
+    } catch (error) {
+      $("#suggestion-message").textContent = error.message;
+    } finally {
+      button.disabled = false;
+    }
+  });
+  $("#suggestions-list").addEventListener("change", async (event) => {
+    const id = event.target.dataset.suggestionId;
+    if (!id) return;
+    event.target.disabled = true;
+    try {
+      await cases.updateSuggestion(id, event.target.value);
+    } catch (error) {
+      notify(error.message, true);
+    } finally {
+      event.target.disabled = false;
+    }
+  });
   $("#open-notifications").addEventListener("click", async () => {
     await refreshNotifications();
     $("#notifications-dialog").showModal();
@@ -591,6 +643,7 @@ export async function initializeWorkspace(source) {
     try {
       await openSales();
       await showUsers();
+      await showSuggestions();
       $("#user-message").textContent = "";
       $("#users-dialog").showModal();
     } catch (error) {

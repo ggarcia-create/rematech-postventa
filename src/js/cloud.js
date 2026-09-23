@@ -77,10 +77,16 @@ export const cloudAuth = {
   },
   create: (values) => cloudCall("create-user", values),
   setRole: (id, role) => cloudCall("set-role", { id, role }),
-  setPermissions: (id, permissions) => cloudCall("set-permissions", { id, permissions }),
+  setPermissions: (id, permissions) =>
+    cloudCall("set-permissions", { id, permissions }),
   resetUserPassword: (id, password) =>
     cloudCall("reset-user-password", { id, password }),
   users: () => cloudCall("users"),
+  createSuggestion: (title, body) =>
+    cloudCall("suggestion-create", { title, body }),
+  suggestions: () => cloudCall("suggestions"),
+  updateSuggestion: (id, status) =>
+    cloudCall("suggestion-update", { id, status }),
   async resetPassword() {
     throw new Error(
       "Solicita al administrador el restablecimiento de tu cuenta compartida.",

@@ -127,6 +127,59 @@ Deno.serve(async (request) => {
       if (user.role !== "admin")
         throw new Error("Acción exclusiva del administrador.");
     };
+    if (input.action === "suggestion-create") {
+      const title = String(input.title || "").trim();
+      const body = String(input.body || "").trim();
+      if (title.length < 3 || body.length < 3)
+        throw new Error(
+          "Escribe un título y una descripción para la propuesta.",
+        );
+      return answer(
+        check(
+          await db
+            .from("rematech_suggestions")
+            .insert({
+              author_id: identity.id,
+              author_name: user.name,
+              title,
+              body,
+            })
+            .select("*")
+            .single(),
+        ),
+      );
+    }
+    if (input.action === "suggestions") {
+      admin();
+      return answer(
+        check(
+          await db
+            .from("rematech_suggestions")
+            .select("*")
+            .order("created_at", { ascending: false }),
+        ),
+      );
+    }
+    if (input.action === "suggestion-update") {
+      admin();
+      const status = String(input.status || "");
+      if (
+        !["pendiente", "en_revision", "implementada", "descartada"].includes(
+          status,
+        )
+      )
+        throw new Error("Estado de propuesta no válido.");
+      return answer(
+        check(
+          await db
+            .from("rematech_suggestions")
+            .update({ status, updated_at: new Date().toISOString() })
+            .eq("id", input.id)
+            .select("*")
+            .single(),
+        ),
+      );
+    }
     if (input.action === "sales-get" || input.action === "sales-save") {
       admin();
       const salesBucket = db.storage.from("rematech-config");
