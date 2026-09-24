@@ -823,3 +823,21 @@
   background: #00d99b;
   color: #10203a;
 }
+
+#users-dialog .settings-data-tools {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 22px 0;
+  padding: 18px 20px;
+  border: 1px solid #d9e2dc;
+  border-radius: 18px;
+  background: #f7faf8;
+}
+#users-dialog .settings-data-tools h3,
+#users-dialog .settings-data-tools p { margin: 0; }
+#users-dialog .settings-data-tools p { color: #71827a; font-size: 13px; }
+@media (max-width: 680px) {
+  #users-dialog .settings-data-tools { align-items: stretch; flex-direction: column; }
+}

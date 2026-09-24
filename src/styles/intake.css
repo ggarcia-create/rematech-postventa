@@ -848,3 +848,19 @@
     cursor: pointer;
   }
 }
+
+.case-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.case-card .card-delete {
+  color: #a32121;
+  background: #ffe3e3;
+  border-color: #efb0b0;
+}
+.case-card .card-delete:hover {
+  color: #fff;
+  background: #c93636;
+  border-color: #c93636;
+}

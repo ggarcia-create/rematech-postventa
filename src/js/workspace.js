@@ -243,7 +243,8 @@ function renderList(area) {
         .map((r) => {
           const received = r.status !== "pendiente";
           const comments = r.comments?.length || 0;
-          return `<article class="case-card ${received ? "is-received" : ""} ${resultClass(r)}" data-case-card="${r.id}"><div class="case-card-face case-card-front"><div class="case-card-top"><span class="case-card-kicker">EXPEDIENTE</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Pedido</dt><dd>${e(r.intake.order || "—")}</dd></div><div><dt>Número de serie</dt><dd>${e(r.intake.serial || "Pendiente")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? "" : `data-open-case="${r.id}"`}>Abrir expediente</button></div></div><div class="case-card-face case-card-back"><div class="case-card-top"><span class="case-card-kicker">${received ? "INTERVENCIÓN REGISTRADA" : "PENDIENTE"}</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><dl><div><dt>Resultado</dt><dd>${e(r.technical?.result || r.intake.resolution || "Pendiente")}</dd></div><div><dt>Técnico</dt><dd>${e(r.technical?.technician || "Por asignar")}</dd></div><div><dt>Última actualización</dt><dd>${e(stamp(r.updatedAt))}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? `data-open-case="${r.id}"` : ""}>Ver expediente</button></div></div></article>`;
+          const deleteButton = auth.user()?.role === "admin" ? `<button type="button" class="card-delete" data-delete-case="${e(r.id)}">Eliminar</button>` : "";
+          return `<article class="case-card ${received ? "is-received" : ""} ${resultClass(r)}" data-case-card="${r.id}"><div class="case-card-face case-card-front"><div class="case-card-top"><span class="case-card-kicker">EXPEDIENTE</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Pedido</dt><dd>${e(r.intake.order || "—")}</dd></div><div><dt>Número de serie</dt><dd>${e(r.intake.serial || "Pendiente")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><span class="case-card-actions">${deleteButton}<button ${received ? "" : `data-open-case="${r.id}"`}>Abrir expediente</button></span></div></div><div class="case-card-face case-card-back"><div class="case-card-top"><span class="case-card-kicker">${received ? "INTERVENCIÓN REGISTRADA" : "PENDIENTE"}</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><dl><div><dt>Resultado</dt><dd>${e(r.technical?.result || r.intake.resolution || "Pendiente")}</dd></div><div><dt>Técnico</dt><dd>${e(r.technical?.technician || "Por asignar")}</dd></div><div><dt>Última actualización</dt><dd>${e(stamp(r.updatedAt))}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><span class="case-card-actions">${deleteButton}<button ${received ? `data-open-case="${r.id}"` : ""}>Ver expediente</button></span></div></div></article>`;
         })
         .join("")}</div>`
     : `<div class="empty-state"><div class="empty-icon">${quality ? "✓" : "▤"}</div><h2>${query ? "Sin coincidencias" : quality ? "No hay equipos en esta bandeja" : "No hay ingresos en esta consulta"}</h2><p>${query ? "Prueba con el folio, número de pedido o número de serie." : quality ? "Los equipos aparecerán aquí cuando Reparación los envíe a Calidad." : "Registra un ingreso para iniciar el seguimiento del equipo."}</p></div>`;
@@ -486,7 +487,7 @@ async function showSuggestions() {
 }
 export async function initializeWorkspace(source) {
   intakeSource = source;
-  const downloadButton = $("#download-cases");
+  const downloadButton = $("#download-cases-settings");
   if (downloadButton) {
     downloadButton.hidden = auth.user()?.role !== "admin";
     downloadButton.addEventListener("click", async () => {
@@ -618,7 +619,20 @@ export async function initializeWorkspace(source) {
   for (const area of ["repair", "quality"]) {
     $(`#${area}-search`).addEventListener("input", () => renderList(area));
     $(`#${area}-filter`).addEventListener("change", () => renderList(area));
-    $(`#${area}-list`).addEventListener("click", (event) => {
+    $(`#${area}-list`).addEventListener("click", async (event) => {
+      const deleteButton = event.target.closest("[data-delete-case]");
+      if (deleteButton) {
+        event.stopPropagation();
+        const record = records.find((item) => item.id === deleteButton.dataset.deleteCase);
+        if (!record || auth.user()?.role !== "admin") return;
+        if (!window.confirm(`¿Eliminar el expediente ${record.intake?.folio || "seleccionado"}? Esta acción no se puede deshacer.`)) return;
+        try {
+          await cases.remove(record.id, auth.user());
+          notify("Expediente eliminado.");
+          await refresh();
+        } catch (error) { notify(error.message, true); }
+        return;
+      }
       const button = event.target.closest("[data-open-case]");
       const card = event.target.closest("[data-case-card]");
       if (button || card)
