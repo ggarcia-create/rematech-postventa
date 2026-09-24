@@ -112,6 +112,23 @@ function setImage(i, blob) {
   evidence[i] = blob;
   imageURLs[i] = blob ? URL.createObjectURL(blob) : null;
 }
+async function resetIntakeForm() {
+  await storage.clear();
+  draft = newDraft();
+  [0, 1].forEach((i) => setImage(i, null));
+  fillFields();
+  components();
+  requests();
+  renderEvidence();
+  update();
+}
+window.addEventListener("rematech:new-intake", async () => {
+  try {
+    await resetIntakeForm();
+  } catch {
+    notify("El ingreso se guardó, pero no se pudo preparar el siguiente formulario.", true);
+  }
+});
 
 $("#mode-label").textContent = CLOUD_MODE ? "CONECTADO" : "MODO LOCAL";
 try {

@@ -23,11 +23,12 @@ let route = "ingresos",
   caseImages = [],
   intakeSource,
   busy = false;
-const stamp = (value) =>
-  new Date(value).toLocaleString("es-MX", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+const stamp = (value) => {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime())
+    ? date.toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })
+    : "—";
+};
 const badge = (status) =>
   `<span class="status-badge ${status}">${STATUSES[status]}</span>`;
 const resultClass = (record) => {
@@ -264,7 +265,10 @@ function detail() {
   );
   const comments = $("#case-detail .case-comments-section");
   const technical = $("#case-detail #technical-form")?.closest(".case-block");
-  if (comments) $("#case-detail").prepend(comments);
+  if (comments) {
+    comments.hidden = true;
+    $("#case-detail").prepend(comments);
+  }
   if (technical && selected.status !== "pendiente")
     $("#case-detail").prepend(technical);
   updateCaseControls($("#case-detail"));
@@ -607,7 +611,10 @@ export async function initializeWorkspace(source) {
   });
   $("#case-comments-count").addEventListener("click", () => {
     const section = $("#case-detail .case-comments-section");
-    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (section) {
+      section.hidden = false;
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   });
   $("#case-detail").addEventListener("change", (event) => {
     if (event.target.name === "faultLocations" && event.target.checked) {
@@ -636,6 +643,7 @@ export async function initializeWorkspace(source) {
       $("#repair-search").value = "";
       $("#repair-filter").value = "";
       await refresh();
+      window.dispatchEvent(new Event("rematech:new-intake"));
       notify(
         `Ingreso ${draft.folio} registrado y enviado a Reparación. La requisición ya está disponible en su expediente.`,
       );

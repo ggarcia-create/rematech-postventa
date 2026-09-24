@@ -10,11 +10,12 @@ import {
 } from "./workflow.js";
 import { escapeHTML as e, displayDate } from "./utils.js";
 import { faultNames } from "./documents.js";
-const stamp = (value) =>
-  new Date(value).toLocaleString("es-MX", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+const stamp = (value) => {
+  const date = new Date(value);
+  return Number.isFinite(date.getTime())
+    ? date.toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })
+    : "—";
+};
 function field(
   label,
   key,
