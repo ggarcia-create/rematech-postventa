@@ -704,8 +704,10 @@ export async function initializeWorkspace(source) {
     const button = $("#register-intake");
     button.disabled = true;
     try {
-      const { draft, evidence } = intakeSource();
+      const intake = intakeSource();
+      const { draft, evidence } = intake;
       await cases.register(draft, evidence, auth.user());
+      if (typeof intake.reset === "function") await intake.reset();
       $("#repair-search").value = "";
       $("#repair-filter").value = "";
       await refresh();

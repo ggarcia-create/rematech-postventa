@@ -128,6 +128,8 @@ try {
 } catch {
   notify("No se pudieron recuperar las evidencias locales.", true);
 }
+// El responsable siempre corresponde a la cuenta que captura el ingreso.
+if (auth.user()?.name) draft.responsible = auth.user().name;
 fillFields();
 components();
 requests();
@@ -291,26 +293,27 @@ $("#ticket-width").addEventListener("change", (event) => {
   draft.ticketWidth = Number(event.target.value);
   update();
 });
+async function resetIntake() {
+  if (evidenceBusy.size) throw new Error("Espera a que termine de guardarse la imagen.");
+  await storage.clear();
+  draft = newDraft();
+  if (auth.user()?.name) draft.responsible = auth.user().name;
+  [0, 1].forEach((i) => setImage(i, null));
+  fillFields();
+  components();
+  requests();
+  renderEvidence();
+  update();
+}
 $("#clear").addEventListener("click", () => $("#clear-dialog").showModal());
 $("#cancel-clear").addEventListener("click", () => $("#clear-dialog").close());
 $("#confirm-clear").addEventListener("click", async () => {
-  if (evidenceBusy.size) {
-    notify("Espera a que termine de guardarse la imagen.", true);
-    return;
-  }
   try {
-    await storage.clear();
-    draft = newDraft();
-    [0, 1].forEach((i) => setImage(i, null));
-    fillFields();
-    components();
-    requests();
-    renderEvidence();
-    update();
+    await resetIntake();
     $("#clear-dialog").close();
     notify("Nueva recepción lista.");
-  } catch {
-    notify("No se pudo limpiar la captura. Intenta de nuevo.", true);
+  } catch (error) {
+    notify(error.message || "No se pudo limpiar la captura. Intenta de nuevo.", true);
   }
 });
 $("#pdf").addEventListener("click", async () => {
@@ -415,7 +418,7 @@ $("#send-form").addEventListener("submit", async (event) => {
 await initializeWorkspace(() => {
   if (evidenceBusy.size)
     throw new Error("Espera a que termine de guardarse la imagen.");
-  return { draft: structuredClone(draft), evidence: [...evidence] };
+  return { draft: structuredClone(draft), evidence: [...evidence], reset: resetIntake };
 });
 
 // The navigation opens over the workspace, preserving room for the intake.

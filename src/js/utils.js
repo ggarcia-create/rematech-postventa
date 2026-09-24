@@ -74,7 +74,6 @@ export function validate(draft, kind) {
   };
   const keys = [
     "folio",
-    "client",
     "equipment",
     "description",
     ...(kind === "repair" && draft.intakeType !== "Devolución"
