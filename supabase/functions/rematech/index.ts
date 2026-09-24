@@ -554,6 +554,9 @@ Deno.serve(async (request) => {
       const paths = (row.body.evidence || []).filter(Boolean);
       if (paths.length)
         check(await db.storage.from("rematech-evidence").remove(paths));
+      // Read receipts reference the case. Remove those auxiliary rows first so
+      // the case can be deleted without leaving foreign-key references behind.
+      check(await db.from("rematech_notification_reads").delete().eq("case_id", input.id));
       check(await db.from("rematech_cases").delete().eq("id", input.id));
       return answer({ ok: true });
     }

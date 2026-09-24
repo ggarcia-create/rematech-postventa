@@ -310,6 +310,12 @@ async function act(action) {
     if (action === "delete") {
       if (auth.user()?.role !== "admin") throw new Error("Solo Administración puede borrar expedientes.");
       if (!window.confirm(`¿Borrar el expediente ${selected.intake.folio}? Esta acción no se puede deshacer.`)) return;
+      const deleteButton = $("#case-detail [data-case-action='delete']");
+      if (deleteButton) {
+        deleteButton.disabled = true;
+        deleteButton.classList.add("is-loading");
+        deleteButton.textContent = "⟳ Eliminando…";
+      }
       await cases.remove(selected.id, auth.user());
       closeCase();
       await refresh();
@@ -626,11 +632,19 @@ export async function initializeWorkspace(source) {
         const record = records.find((item) => item.id === deleteButton.dataset.deleteCase);
         if (!record || auth.user()?.role !== "admin") return;
         if (!window.confirm(`¿Eliminar el expediente ${record.intake?.folio || "seleccionado"}? Esta acción no se puede deshacer.`)) return;
+        deleteButton.disabled = true;
+        deleteButton.classList.add("is-loading");
+        deleteButton.textContent = "⟳ Eliminando…";
         try {
           await cases.remove(record.id, auth.user());
           notify("Expediente eliminado.");
           await refresh();
-        } catch (error) { notify(error.message, true); }
+        } catch (error) {
+          deleteButton.disabled = false;
+          deleteButton.classList.remove("is-loading");
+          deleteButton.textContent = "Eliminar";
+          notify(error.message, true);
+        }
         return;
       }
       const button = event.target.closest("[data-open-case]");

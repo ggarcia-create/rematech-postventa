@@ -864,3 +864,16 @@
   background: #c93636;
   border-color: #c93636;
 }
+
+
+@keyframes rematech-spin { to { transform: rotate(360deg); } }
+.case-card .card-delete.is-loading,
+.case-admin-actions button.is-loading {
+  cursor: wait;
+  opacity: .75;
+}
+.case-card .card-delete.is-loading::first-letter,
+.case-admin-actions button.is-loading::first-letter {
+  display: inline-block;
+  animation: rematech-spin .8s linear infinite;
+}
