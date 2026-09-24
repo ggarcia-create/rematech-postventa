@@ -11,10 +11,13 @@ import {
 import { escapeHTML as e, displayDate } from "./utils.js";
 import { faultNames } from "./documents.js";
 const stamp = (value) => {
-  const date = new Date(value);
-  return Number.isFinite(date.getTime())
-    ? date.toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })
-    : "—";
+  try {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "—";
+    return date.toLocaleString("es-MX");
+  } catch {
+    return "—";
+  }
 };
 function field(
   label,

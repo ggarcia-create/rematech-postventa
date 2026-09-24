@@ -25,10 +25,13 @@ let route = "ingresos",
   intakeSource,
   busy = false;
 const stamp = (value) => {
-  const date = new Date(value);
-  return Number.isFinite(date.getTime())
-    ? date.toLocaleString("es-MX", { dateStyle: "medium", timeStyle: "short" })
-    : "—";
+  try {
+    const date = new Date(value);
+    if (!Number.isFinite(date.getTime())) return "—";
+    return date.toLocaleString("es-MX");
+  } catch {
+    return "—";
+  }
 };
 const badge = (status) =>
   `<span class="status-badge ${status}">${STATUSES[status]}</span>`;

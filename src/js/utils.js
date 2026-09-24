@@ -12,8 +12,12 @@ export function localDate(date = new Date()) {
 export function generateFolio(date = new Date()) {
   return `RT-${localDate(date).slice(2).replaceAll("-", "")}-${String(date.getHours()).padStart(2, "0")}${String(date.getMinutes()).padStart(2, "0")}-${crypto.randomUUID().slice(0, 4).toUpperCase()}`;
 }
-export const displayDate = (value) =>
-  value ? value.split("-").reverse().join("/") : "—";
+export const displayDate = (value) => {
+  const text = String(value ?? "");
+  return /^\d{4}-\d{2}-\d{2}$/.test(text)
+    ? text.split("-").reverse().join("/")
+    : text || "—";
+};
 export const validEmail = (value) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) && value.length <= 254;
 export const filename = (kind, folio) =>
