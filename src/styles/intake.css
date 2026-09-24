@@ -512,6 +512,18 @@
   .case-card.result-purple .case-card-face { border-color: #8d5bd1; box-shadow: 0 0 0 2px #8d5bd122; }
   .case-card.result-yellow .case-card-face { border-color: #d6a72c; box-shadow: 0 0 0 2px #d6a72c22; }
   .case-card.result-red .case-card-face { border-color: #d94d4d; box-shadow: 0 0 0 2px #d94d4d22; }
+  .case-card:not(.is-received) .case-card-face {
+    background: #eaf3ff;
+    border-color: #b9d3f2;
+  }
+  .case-card.result-green .case-card-face { background: #e8f8ef; }
+  .case-card.result-purple .case-card-face { background: #f1eaff; }
+  .case-card.result-yellow .case-card-face { background: #fff5d7; }
+  .case-card.result-red .case-card-face { background: #ffe8e8; }
+  .case-card.result-green .case-card-back,
+  .case-card.result-purple .case-card-back,
+  .case-card.result-yellow .case-card-back,
+  .case-card.result-red .case-card-back { color: #122039; }
   .case-card h2 {
     margin: 22px 0 7px;
     color: inherit;
