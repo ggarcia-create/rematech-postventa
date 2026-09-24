@@ -12,6 +12,7 @@ import {
   defaultPermissions,
   STATUSES,
   matchesCase,
+  normalizeRecord,
 } from "./workflow.js";
 import { escapeHTML as e, displayDate } from "./utils.js";
 import { generatePDF, savePDF } from "./pdf.js";
@@ -226,7 +227,18 @@ function renderList(area) {
   const quality = area === "quality";
   const query = $(`#${area}-search`).value;
   const status = $(`#${area}-filter`).value;
-  const data = records.filter((r) => {
+  // Older local records may lack newer fields. Normalize each record before
+  // filtering/rendering so one malformed row cannot blank the entire list.
+  const safeRecords = records
+    .map((record) => {
+      try {
+        return normalizeRecord(record);
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean);
+  const data = safeRecords.filter((r) => {
     try {
       return (
         (!quality || ["calidad", "finalizado"].includes(r.status)) &&
@@ -240,14 +252,15 @@ function renderList(area) {
   $(`#${area}-list`).innerHTML = data.length
     ? `<div class="case-count"><span>${data.length} expediente${data.length === 1 ? "" : "s"}</span><small>Selecciona una tarjeta para consultar el expediente completo</small></div><div class="case-grid">${data
         .map((r) => {
+          const intake = r.intake || {};
           const received = r.status !== "pendiente";
           const comments = r.comments?.length || 0;
-          return `<article class="case-card ${received ? "is-received" : ""}" data-case-card="${r.id}"><div class="case-card-face case-card-front"><div class="case-card-top"><span class="case-card-kicker">EXPEDIENTE</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Pedido</dt><dd>${e(r.intake.order || "—")}</dd></div><div><dt>Número de serie</dt><dd>${e(r.intake.serial || "Pendiente")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? "" : `data-open-case="${r.id}"`}>Abrir expediente</button></div></div><div class="case-card-face case-card-back"><div class="case-card-top"><span class="case-card-kicker">${received ? "INTERVENCIÓN REGISTRADA" : "PENDIENTE"}</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><dl><div><dt>Resultado</dt><dd>${e(r.technical?.result || r.intake.resolution || "Pendiente")}</dd></div><div><dt>Técnico</dt><dd>${e(r.technical?.technician || "Por asignar")}</dd></div><div><dt>Última actualización</dt><dd>${e(stamp(r.updatedAt))}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? `data-open-case="${r.id}"` : ""}>Ver expediente</button></div></div></article>`;
+          return `<article class="case-card ${received ? "is-received" : ""}" data-case-card="${e(r.id)}"><div class="case-card-face case-card-front"><div class="case-card-top"><span class="case-card-kicker">EXPEDIENTE</span>${badge(r.status)}</div><h2>${e(intake.folio || r.id || "Sin folio")}</h2><p class="case-card-client">${e(intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(intake.equipment || "—")}</dd></div><div><dt>Pedido</dt><dd>${e(intake.order || "—")}</dd></div><div><dt>Número de serie</dt><dd>${e(intake.serial || "Pendiente")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? "" : `data-open-case="${e(r.id)}"`}>Abrir expediente</button></div></div><div class="case-card-face case-card-back"><div class="case-card-top"><span class="case-card-kicker">${received ? "INTERVENCIÓN REGISTRADA" : "PENDIENTE"}</span>${badge(r.status)}</div><h2>${e(intake.folio || r.id || "Sin folio")}</h2><dl><div><dt>Resultado</dt><dd>${e(r.technical?.result || intake.resolution || "Pendiente")}</dd></div><div><dt>Técnico</dt><dd>${e(r.technical?.technician || "Por asignar")}</dd></div><div><dt>Última actualización</dt><dd>${e(stamp(r.updatedAt))}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? `data-open-case="${e(r.id)}"` : ""}>Ver expediente</button></div></div></article>`;
         })
         .join("")}</div>`
     : `<div class="empty-state"><div class="empty-icon">${quality ? "✓" : "▤"}</div><h2>${query ? "Sin coincidencias" : quality ? "No hay equipos en esta bandeja" : "No hay ingresos en esta consulta"}</h2><p>${query ? "Prueba con el folio, número de pedido o número de serie." : quality ? "Los equipos aparecerán aquí cuando Reparación los envíe a Calidad." : "Registra un ingreso para iniciar el seguimiento del equipo."}</p></div>`;
   $(`#${area}-list`).querySelectorAll("[data-case-card]").forEach((card) => {
-    const record = records.find((item) => item.id === card.dataset.caseCard);
+    const record = safeRecords.find((item) => item.id === card.dataset.caseCard);
     if (record) card.classList.add(resultClass(record));
   });
 }
@@ -457,9 +470,16 @@ async function showUsers(onlyUserId) {
     if (row) row.outerHTML = html;
   } else $("#users-list").innerHTML = html;
 }
+const suggestionStore = () =>
+  typeof cases.suggestions === "function"
+    ? cases
+    : typeof auth.suggestions === "function"
+      ? auth
+      : localCases;
+
 async function showSuggestions() {
   if (auth.user()?.role !== "admin") return;
-  const list = await cases.suggestions();
+  const list = await suggestionStore().suggestions();
   $("#suggestions-list").innerHTML = list.length
     ? list
         .map(
@@ -485,7 +505,7 @@ export async function initializeWorkspace(source) {
     button.disabled = true;
     try {
       const data = new FormData(event.target);
-      await cases.createSuggestion(
+      await suggestionStore().createSuggestion(
         data.get("title"),
         data.get("body"),
         auth.user(),
@@ -504,7 +524,7 @@ export async function initializeWorkspace(source) {
     if (!id) return;
     event.target.disabled = true;
     try {
-      await cases.updateSuggestion(id, event.target.value);
+      await suggestionStore().updateSuggestion(id, event.target.value);
     } catch (error) {
       notify(error.message, true);
     } finally {

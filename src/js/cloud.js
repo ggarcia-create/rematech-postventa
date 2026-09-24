@@ -115,6 +115,11 @@ async function getCase(id) {
 }
 export const cloudCases = {
   list: () => cloudCall("list"),
+  createSuggestion: (title, body) =>
+    cloudCall("suggestion-create", { title, body }),
+  suggestions: () => cloudCall("suggestions"),
+  updateSuggestion: (id, status) =>
+    cloudCall("suggestion-update", { id, status }),
   async importLocal(record) {
     return cloudCall("import-local", {
       record: { ...record, evidence: [] },
