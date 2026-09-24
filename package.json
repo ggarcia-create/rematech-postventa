@@ -1,6 +1,6 @@
 {
   "name": "rematech-postventa",
-  "version": "1.6.9+demo.03",
+  "version": "1.6.9+demo.04",
   "private": true,
   "type": "module",
   "scripts": {

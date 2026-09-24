@@ -287,6 +287,18 @@ async function openCase(id) {
     notify(error.message, true);
   }
 }
+async function downloadAllCases() {
+  if (auth.user()?.role !== "admin") throw new Error("Solo Administración puede descargar expedientes.");
+  const all = await cases.list();
+  const payload = all.map((record) => ({ ...record, evidence: undefined }));
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `expedientes-rematech-${new Date().toISOString().slice(0, 10)}.json`;
+  link.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
 async function act(action) {
   if (busy || !selected || !auth.user()) return;
   busy = true;
@@ -294,6 +306,15 @@ async function act(action) {
     .querySelectorAll("button")
     .forEach((button) => (button.disabled = true));
   try {
+    if (action === "delete") {
+      if (auth.user()?.role !== "admin") throw new Error("Solo Administración puede borrar expedientes.");
+      if (!window.confirm(`¿Borrar el expediente ${selected.intake.folio}? Esta acción no se puede deshacer.`)) return;
+      await cases.remove(selected.id, auth.user());
+      closeCase();
+      await refresh();
+      notify("Expediente borrado correctamente.");
+      return;
+    }
     if (action === "pdf") {
       const blob = await generatePDF(
         {
@@ -465,6 +486,16 @@ async function showSuggestions() {
 }
 export async function initializeWorkspace(source) {
   intakeSource = source;
+  const downloadButton = $("#download-cases");
+  if (downloadButton) {
+    downloadButton.hidden = auth.user()?.role !== "admin";
+    downloadButton.addEventListener("click", async () => {
+      downloadButton.disabled = true;
+      try { await downloadAllCases(); notify("Todos los expedientes fueron descargados."); }
+      catch (error) { notify(error.message, true); }
+      finally { downloadButton.disabled = false; }
+    });
+  }
   $("#open-suggestion").addEventListener("click", () => {
     $("#suggestion-form").reset();
     $("#suggestion-message").textContent = "";

@@ -549,6 +549,14 @@ Deno.serve(async (request) => {
       );
       return answer(record);
     }
+    if (input.action === "delete") {
+      admin();
+      const paths = (row.body.evidence || []).filter(Boolean);
+      if (paths.length)
+        check(await db.storage.from("rematech-evidence").remove(paths));
+      check(await db.from("rematech_cases").delete().eq("id", input.id));
+      return answer({ ok: true });
+    }
     if (input.action === "read") {
       const note = (row.body.notifications || []).find(
         (n: any) =>
