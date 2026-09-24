@@ -524,6 +524,30 @@
   .case-card.result-purple .case-card-back,
   .case-card.result-yellow .case-card-back,
   .case-card.result-red .case-card-back { color: #122039; }
+  .case-card.result-green .case-card-back .case-card-kicker,
+  .case-card.result-purple .case-card-back .case-card-kicker,
+  .case-card.result-yellow .case-card-back .case-card-kicker,
+  .case-card.result-red .case-card-back .case-card-kicker,
+  .case-card.result-green .case-card-back dt,
+  .case-card.result-purple .case-card-back dt,
+  .case-card.result-yellow .case-card-back dt,
+  .case-card.result-red .case-card-back dt,
+  .case-card.result-green .case-card-back .comment-count,
+  .case-card.result-purple .case-card-back .comment-count,
+  .case-card.result-yellow .case-card-back .comment-count,
+  .case-card.result-red .case-card-back .comment-count { color: #557064; }
+  .case-card.result-green .case-card-back dd,
+  .case-card.result-purple .case-card-back dd,
+  .case-card.result-yellow .case-card-back dd,
+  .case-card.result-red .case-card-back dd { color: #122039; }
+  .case-card.result-green .case-card-back dl div,
+  .case-card.result-purple .case-card-back dl div,
+  .case-card.result-yellow .case-card-back dl div,
+  .case-card.result-red .case-card-back dl div { border-color: #12203925; }
+  .case-card.result-green .case-card-back .case-card-top .status-badge,
+  .case-card.result-purple .case-card-back .case-card-top .status-badge,
+  .case-card.result-yellow .case-card-back .case-card-top .status-badge,
+  .case-card.result-red .case-card-back .case-card-top .status-badge { background: #12203918; color: #122039; }
   .case-card h2 {
     margin: 22px 0 7px;
     color: inherit;
