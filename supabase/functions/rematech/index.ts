@@ -380,8 +380,8 @@ Deno.serve(async (request) => {
       const rows = await allCases();
       return answer(
         rows
-          .map((r: any) => ({ ...r.body, evidence: [] }))
-          .sort((a: any, b: any) => b.updatedAt.localeCompare(a.updatedAt)),
+          .map((r: any) => ({ ...normalizeRecord(r.body), evidence: [] }))
+          .sort((a: any, b: any) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))),
       );
     }
     if (input.action === "notifications") {

@@ -226,12 +226,17 @@ function renderList(area) {
   const quality = area === "quality";
   const query = $(`#${area}-search`).value;
   const status = $(`#${area}-filter`).value;
-  const data = records.filter(
-    (r) =>
-      (!quality || ["calidad", "finalizado"].includes(r.status)) &&
-      (!status || r.status === status) &&
-      matchesCase(r, query),
-  );
+  const data = records.filter((r) => {
+    try {
+      return (
+        (!quality || ["calidad", "finalizado"].includes(r.status)) &&
+        (!status || r.status === status) &&
+        matchesCase(r, query)
+      );
+    } catch {
+      return false;
+    }
+  });
   $(`#${area}-list`).innerHTML = data.length
     ? `<div class="case-count"><span>${data.length} expediente${data.length === 1 ? "" : "s"}</span><small>Selecciona una tarjeta para consultar el expediente completo</small></div><div class="case-grid">${data
         .map((r) => {
