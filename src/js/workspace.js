@@ -12,6 +12,7 @@ import {
   defaultPermissions,
   STATUSES,
   matchesCase,
+  normalizeRecord,
 } from "./workflow.js";
 import { escapeHTML as e, displayDate } from "./utils.js";
 import { generatePDF, savePDF } from "./pdf.js";
@@ -23,13 +24,25 @@ let route = "ingresos",
   caseImages = [],
   intakeSource,
   busy = false;
-const stamp = (value) =>
-  new Date(value).toLocaleString("es-MX", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+const stamp = (value) => {
+  try {
+    const date = new Date(value);
+    return Number.isFinite(date.getTime()) ? date.toLocaleString("es-MX") : "—";
+  } catch { return "—"; }
+};
 const badge = (status) =>
   `<span class="status-badge ${status}">${STATUSES[status]}</span>`;
+const resultClass = (record) => {
+  const result = String(record.technical?.result || record.intake?.resolution || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+  if (result.includes("reparado") || result.includes("sin falla")) return "result-green";
+  if (result.includes("cambio")) return "result-purple";
+  if (result.includes("pieza")) return "result-yellow";
+  if (result.includes("no procede") || result.includes("no aplica")) return "result-red";
+  return "";
+};
 const errorText = (id, error) => {
   $(id).textContent = error.message || String(error);
 };
@@ -214,7 +227,12 @@ function renderList(area) {
   const quality = area === "quality";
   const query = $(`#${area}-search`).value;
   const status = $(`#${area}-filter`).value;
-  const data = records.filter(
+  const safeRecords = records
+    .map((record) => {
+      try { return normalizeRecord(record); } catch { return null; }
+    })
+    .filter(Boolean);
+  const data = safeRecords.filter(
     (r) =>
       (!quality || ["calidad", "finalizado"].includes(r.status)) &&
       (!status || r.status === status) &&
@@ -225,7 +243,7 @@ function renderList(area) {
         .map((r) => {
           const received = r.status !== "pendiente";
           const comments = r.comments?.length || 0;
-          return `<article class="case-card ${received ? "is-received" : ""}" data-case-card="${r.id}"><div class="case-card-face case-card-front"><div class="case-card-top"><span class="case-card-kicker">EXPEDIENTE</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Pedido</dt><dd>${e(r.intake.order || "—")}</dd></div><div><dt>Número de serie</dt><dd>${e(r.intake.serial || "Pendiente")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? "" : `data-open-case="${r.id}"`}>Abrir expediente</button></div></div><div class="case-card-face case-card-back"><div class="case-card-top"><span class="case-card-kicker">${received ? "INTERVENCIÓN REGISTRADA" : "PENDIENTE"}</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><dl><div><dt>Resultado</dt><dd>${e(r.technical?.result || r.intake.resolution || "Pendiente")}</dd></div><div><dt>Técnico</dt><dd>${e(r.technical?.technician || "Por asignar")}</dd></div><div><dt>Última actualización</dt><dd>${e(stamp(r.updatedAt))}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? `data-open-case="${r.id}"` : ""}>Ver expediente</button></div></div></article>`;
+          return `<article class="case-card ${received ? "is-received" : ""} ${resultClass(r)}" data-case-card="${r.id}"><div class="case-card-face case-card-front"><div class="case-card-top"><span class="case-card-kicker">EXPEDIENTE</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Pedido</dt><dd>${e(r.intake.order || "—")}</dd></div><div><dt>Número de serie</dt><dd>${e(r.intake.serial || "Pendiente")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? "" : `data-open-case="${r.id}"`}>Abrir expediente</button></div></div><div class="case-card-face case-card-back"><div class="case-card-top"><span class="case-card-kicker">${received ? "INTERVENCIÓN REGISTRADA" : "PENDIENTE"}</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><dl><div><dt>Resultado</dt><dd>${e(r.technical?.result || r.intake.resolution || "Pendiente")}</dd></div><div><dt>Técnico</dt><dd>${e(r.technical?.technician || "Por asignar")}</dd></div><div><dt>Última actualización</dt><dd>${e(stamp(r.updatedAt))}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${comments} comentario${comments === 1 ? "" : "s"}</span><button ${received ? `data-open-case="${r.id}"` : ""}>Ver expediente</button></div></div></article>`;
         })
         .join("")}</div>`
     : `<div class="empty-state"><div class="empty-icon">${quality ? "✓" : "▤"}</div><h2>${query ? "Sin coincidencias" : quality ? "No hay equipos en esta bandeja" : "No hay ingresos en esta consulta"}</h2><p>${query ? "Prueba con el folio, número de pedido o número de serie." : quality ? "Los equipos aparecerán aquí cuando Reparación los envíe a Calidad." : "Registra un ingreso para iniciar el seguimiento del equipo."}</p></div>`;
@@ -249,7 +267,10 @@ function detail() {
   );
   const comments = $("#case-detail .case-comments-section");
   const technical = $("#case-detail #technical-form")?.closest(".case-block");
-  if (comments) $("#case-detail").prepend(comments);
+  if (comments) {
+    comments.hidden = true;
+    $("#case-detail").prepend(comments);
+  }
   if (technical && selected.status !== "pendiente")
     $("#case-detail").prepend(technical);
   updateCaseControls($("#case-detail"));
@@ -423,9 +444,16 @@ async function showUsers(onlyUserId) {
     if (row) row.outerHTML = html;
   } else $("#users-list").innerHTML = html;
 }
+const suggestionStore = () =>
+  typeof cases.suggestions === "function"
+    ? cases
+    : typeof auth.suggestions === "function"
+      ? auth
+      : localCases;
+
 async function showSuggestions() {
   if (auth.user()?.role !== "admin") return;
-  const list = await cases.suggestions();
+  const list = await suggestionStore().suggestions();
   $("#suggestions-list").innerHTML = list.length
     ? list
         .map(
@@ -451,7 +479,7 @@ export async function initializeWorkspace(source) {
     button.disabled = true;
     try {
       const data = new FormData(event.target);
-      await cases.createSuggestion(
+      await suggestionStore().createSuggestion(
         data.get("title"),
         data.get("body"),
         auth.user(),
@@ -470,7 +498,7 @@ export async function initializeWorkspace(source) {
     if (!id) return;
     event.target.disabled = true;
     try {
-      await cases.updateSuggestion(id, event.target.value);
+      await suggestionStore().updateSuggestion(id, event.target.value);
     } catch (error) {
       notify(error.message, true);
     } finally {
@@ -582,7 +610,18 @@ export async function initializeWorkspace(source) {
   });
   $("#case-comments-count").addEventListener("click", () => {
     const section = $("#case-detail .case-comments-section");
-    if (section) section.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (section) {
+      $("#case-detail").classList.add("comments-mode");
+      section.hidden = false;
+      section.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  });
+  $("#case-detail").addEventListener("click", (event) => {
+    if (event.target.closest("[data-case-view='overview']")) {
+      $("#case-detail").classList.remove("comments-mode");
+      const section = $("#case-detail .case-comments-section");
+      if (section) section.hidden = true;
+    }
   });
   $("#case-detail").addEventListener("change", (event) => {
     if (event.target.name === "faultLocations" && event.target.checked) {

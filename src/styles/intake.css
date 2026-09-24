@@ -508,6 +508,10 @@
   .case-card-back .case-card-kicker {
     color: #a9c4b5;
   }
+  .case-card.result-green .case-card-face { border-color: #38b981; box-shadow: 0 0 0 2px #38b98122; }
+  .case-card.result-purple .case-card-face { border-color: #8d5bd1; box-shadow: 0 0 0 2px #8d5bd122; }
+  .case-card.result-yellow .case-card-face { border-color: #d6a72c; box-shadow: 0 0 0 2px #d6a72c22; }
+  .case-card.result-red .case-card-face { border-color: #d94d4d; box-shadow: 0 0 0 2px #d94d4d22; }
   .case-card h2 {
     margin: 22px 0 7px;
     color: inherit;
@@ -646,6 +650,24 @@
   .case-dialog .case-comments {
     border-top: 1px solid #e1e9e4;
     padding-top: 4px;
+  }
+  .case-comments-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .case-comments-heading button {
+    border: 1px solid #dce5df;
+    border-radius: 999px;
+    background: #fff;
+    padding: 8px 12px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .case-dialog #case-detail.comments-mode > * { display: none; }
+  .case-dialog #case-detail.comments-mode > .case-comments-section {
+    display: block;
   }
 }
 @media screen and (max-width: 1100px) {

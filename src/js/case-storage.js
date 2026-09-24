@@ -5,7 +5,7 @@ import { createCase, applyAction, normalizeRecord } from "./workflow.js";
 // Atomic IndexedDB repository. Replace this boundary for shared/server storage.
 const decodeRecord = (record) =>
   record
-    ? { ...normalizeRecord(record), evidence: record.evidence.map(decodeImage) }
+    ? { ...normalizeRecord(record), evidence: (Array.isArray(record.evidence) ? record.evidence : []).map(decodeImage) }
     : record;
 let connection;
 function database() {
@@ -126,7 +126,7 @@ export const localCases = {
         done(
           q.result
             .map(decodeRecord)
-            .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt)),
+            .sort((a, b) => String(b.updatedAt || "").localeCompare(String(a.updatedAt || ""))),
         );
     });
   },
