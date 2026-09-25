@@ -438,7 +438,7 @@
   .sales-period {
     margin-top: 12px;
   }
-  #users-dialog .manual-sales-grid {
+  #view-settings .manual-sales-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
@@ -577,8 +577,9 @@
   .check-card {
     border-radius: 9px;
   }
-  #users-dialog {
-    width: min(820px, 94vw);
+  #view-settings {
+    width: auto;
+    max-width: none;
   }
   #users-title {
     font-size: 27px;
@@ -616,25 +617,25 @@
     gap: 8px;
     flex: none;
   }
-  #users-dialog .sales-period input,
-  #users-dialog .sales-period select {
+  #view-settings .sales-period input,
+  #view-settings .sales-period select {
     min-height: 36px;
     margin-top: 4px;
   }
-  #users-dialog .manual-sales-grid {
+  #view-settings .manual-sales-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 9px;
     margin-top: 16px;
   }
-  #users-dialog .manual-sales-grid label {
+  #view-settings .manual-sales-grid label {
     background: white;
     border: 1px solid #dce4df;
     border-radius: 10px;
     padding: 10px;
     font-size: 11px;
   }
-  #users-dialog .manual-sales-grid input {
+  #view-settings .manual-sales-grid input {
     min-height: 34px;
     padding: 7px;
     margin-top: 7px;
@@ -701,24 +702,24 @@
     font-size: 11px;
     min-height: 32px;
   }
-  #users-dialog .permission-toggles,
-  #users-dialog .permissions-fieldset {
+  #view-settings .permission-toggles,
+  #view-settings .permissions-fieldset {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 6px;
     margin: 8px 0;
   }
-  #users-dialog .permissions-fieldset {
+  #view-settings .permissions-fieldset {
     grid-column: 1/-1;
     padding: 10px;
     border: 1px solid #e0e6e3;
     border-radius: 10px;
   }
-  #users-dialog .permissions-fieldset legend {
+  #view-settings .permissions-fieldset legend {
     font-size: 12px;
   }
-  #users-dialog .permission-toggles label,
-  #users-dialog .permissions-fieldset label {
+  #view-settings .permission-toggles label,
+  #view-settings .permissions-fieldset label {
     display: flex;
     align-items: center;
     gap: 7px;
@@ -730,13 +731,13 @@
     font-weight: 500;
     cursor: pointer;
   }
-  #users-dialog .permission-toggles label:has(input:checked),
-  #users-dialog .permissions-fieldset label:has(input:checked) {
+  #view-settings .permission-toggles label:has(input:checked),
+  #view-settings .permissions-fieldset label:has(input:checked) {
     background: #e8faf3;
     border-color: #7ccfb2;
   }
-  #users-dialog .permission-toggles input,
-  #users-dialog .permissions-fieldset input {
+  #view-settings .permission-toggles input,
+  #view-settings .permissions-fieldset input {
     width: 14px;
     height: 14px;
     min-height: 0;
@@ -824,7 +825,7 @@
   color: #10203a;
 }
 
-#users-dialog .settings-data-tools {
+#view-settings .settings-data-tools {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -835,17 +836,17 @@
   border-radius: 18px;
   background: #f7faf8;
 }
-#users-dialog .settings-data-tools h3,
-#users-dialog .settings-data-tools p { margin: 0; }
-#users-dialog .settings-data-tools p { color: #71827a; font-size: 13px; }
-#users-dialog .settings-download-actions {
+#view-settings .settings-data-tools h3,
+#view-settings .settings-data-tools p { margin: 0; }
+#view-settings .settings-data-tools p { color: #71827a; font-size: 13px; }
+#view-settings .settings-download-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
-#users-dialog .settings-download-actions .primary {
+#view-settings .settings-download-actions .primary {
   white-space: nowrap;
 }
 @media (max-width: 680px) {
-  #users-dialog .settings-data-tools { align-items: stretch; flex-direction: column; }
+  #view-settings .settings-data-tools { align-items: stretch; flex-direction: column; }
 }

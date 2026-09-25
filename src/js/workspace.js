@@ -786,7 +786,7 @@ export async function initializeWorkspace(source) {
       await showUsers();
       await showSuggestions();
       $("#user-message").textContent = "";
-      $("#users-dialog").showModal();
+      await navigate("settings");
     } catch (error) {
       notify(error.message, true);
     }
@@ -917,7 +917,7 @@ export async function initializeWorkspace(source) {
       inputs.forEach((input) => (input.disabled = false));
     }
   });
-  $("#close-users").addEventListener("click", () => $("#users-dialog").close());
+  $("#close-users").addEventListener("click", () => navigate(defaultRoute()));
   $('#user-form [name="role"]').addEventListener("change", (event) => {
     const defaults = defaultPermissions(event.target.value);
     document

@@ -234,6 +234,7 @@
             </button>
             <button
               id="manage-users"
+              data-route="settings"
               aria-label="Configuración"
               title="Configuración"
               hidden
@@ -680,26 +681,7 @@
             </div>
             <div id="quality-list" class="case-list" aria-live="polite"></div>
           </section>
-        </main>
-      </div>
-    </div>
-    <dialog id="case-dialog" class="case-dialog" aria-labelledby="case-title">
-      <div class="case-dialog-heading">
-        <div>
-          <div class="eyebrow">EXPEDIENTE DE SERVICIO</div>
-          <h2 id="case-title"></h2>
-        </div>
-        <div class="case-dialog-heading-actions">
-          <span id="case-comments-count" class="case-comments-count"
-            >Comentarios <b>0</b></span
-          >
-          <button id="close-case" aria-label="Cerrar expediente">Cerrar</button>
-        </div>
-      </div>
-      <div id="case-detail"></div>
-      <p id="case-message" role="status" aria-live="polite"></p>
-    </dialog>
-    <dialog id="users-dialog" aria-labelledby="users-title">
+    <section id="view-settings" data-view="settings" class="module-view" hidden aria-labelledby="users-title">
       <div class="eyebrow">ADMINISTRACIÓN</div>
       <h2 id="users-title">Configuración</h2>
       <p class="settings-intro">Usuarios y permisos</p>
@@ -859,10 +841,29 @@
         </p>
         <p id="user-message" role="status"></p>
         <div class="modal-actions">
-          <button type="button" id="close-users">Cerrar</button
+          <button type="button" id="close-users">Volver</button
           ><button type="submit" class="primary">Crear usuario</button>
         </div>
       </form>
+    </section>
+        </main>
+      </div>
+    </div>
+    <dialog id="case-dialog" class="case-dialog" aria-labelledby="case-title">
+      <div class="case-dialog-heading">
+        <div>
+          <div class="eyebrow">EXPEDIENTE DE SERVICIO</div>
+          <h2 id="case-title"></h2>
+        </div>
+        <div class="case-dialog-heading-actions">
+          <span id="case-comments-count" class="case-comments-count"
+            >Comentarios <b>0</b></span
+          >
+          <button id="close-case" aria-label="Cerrar expediente">Cerrar</button>
+        </div>
+      </div>
+      <div id="case-detail"></div>
+      <p id="case-message" role="status" aria-live="polite"></p>
     </dialog>
     <dialog id="suggestion-dialog" aria-labelledby="suggestion-title">
       <form id="suggestion-form">
