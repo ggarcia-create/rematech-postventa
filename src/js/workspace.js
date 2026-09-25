@@ -533,7 +533,9 @@ async function showSuggestions() {
 export async function initializeWorkspace(source) {
   intakeSource = source;
   document.querySelectorAll("[id^='download-cases-']").forEach((downloadButton) => {
-    downloadButton.hidden = auth.user()?.role !== "admin";
+    // Configuración solo está disponible para Administración; no ocultar aquí
+    // porque initializeWorkspace se ejecuta antes de completar el inicio de sesión.
+    downloadButton.hidden = false;
     downloadButton.addEventListener("click", async () => {
       downloadButton.disabled = true;
       try {
