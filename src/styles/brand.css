@@ -838,6 +838,14 @@
 #users-dialog .settings-data-tools h3,
 #users-dialog .settings-data-tools p { margin: 0; }
 #users-dialog .settings-data-tools p { color: #71827a; font-size: 13px; }
+#users-dialog .settings-download-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+#users-dialog .settings-download-actions .primary {
+  white-space: nowrap;
+}
 @media (max-width: 680px) {
   #users-dialog .settings-data-tools { align-items: stretch; flex-direction: column; }
 }

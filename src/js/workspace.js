@@ -288,17 +288,56 @@ async function openCase(id) {
     notify(error.message, true);
   }
 }
-async function downloadAllCases() {
-  if (auth.user()?.role !== "admin") throw new Error("Solo Administración puede descargar expedientes.");
-  const all = await cases.list();
-  const payload = all.map((record) => ({ ...record, evidence: undefined }));
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+function exportRows(records) {
+  return records.map((record) => ({
+    id: record.id,
+    folio: record.intake?.folio || "",
+    status: STATUSES[record.status] || record.status || "",
+    fecha: record.intake?.date || "",
+    canal: record.intake?.origin || "",
+    pedido: record.intake?.order || "",
+    serie: record.intake?.serial || "",
+    equipo: record.intake?.equipment || "",
+    cliente: record.intake?.client || "",
+    correo: record.intake?.clientEmail || "",
+    tipoIngreso: record.intake?.intakeType || "",
+    resolucion: record.technical?.result || record.intake?.resolution || "",
+    responsable: record.intake?.responsible || "",
+    tecnico: record.technical?.technician || "",
+    comentarios: record.comments?.length || 0,
+    creado: record.createdAt || "",
+    actualizado: record.updatedAt || "",
+  }));
+}
+function downloadBlob(blob, name) {
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `expedientes-rematech-${new Date().toISOString().slice(0, 10)}.json`;
+  link.download = name;
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+function csvValue(value) {
+  const text = String(value ?? "");
+  return /[",\n\r]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+async function downloadAllCases(format = "json") {
+  if (auth.user()?.role !== "admin") throw new Error("Solo Administración puede descargar expedientes.");
+  const all = await cases.list();
+  const date = new Date().toISOString().slice(0, 10);
+  const rows = exportRows(all);
+  if (format === "json") {
+    downloadBlob(new Blob([JSON.stringify(all.map(({ evidence, ...record }) => record), null, 2)], { type: "application/json" }), `expedientes-rematech-${date}.json`);
+  } else {
+    const headers = Object.keys(rows[0] || { folio: "" });
+    if (format === "csv") {
+      const content = [headers, ...rows.map((row) => headers.map((header) => row[header]))].map((row) => row.map(csvValue).join(",")).join("\r\n");
+      downloadBlob(new Blob(["\ufeff", content], { type: "text/csv;charset=utf-8" }), `expedientes-rematech-${date}.csv`);
+    } else {
+      const table = `<html><head><meta charset="utf-8"></head><body><table><thead><tr>${headers.map((header) => `<th>${e(header)}</th>`).join("")}</tr></thead><tbody>${rows.map((row) => `<tr>${headers.map((header) => `<td>${e(row[header])}</td>`).join("")}</tr>`).join("")}</tbody></table></body></html>`;
+      downloadBlob(new Blob([table], { type: "application/vnd.ms-excel;charset=utf-8" }), `expedientes-rematech-${date}.xls`);
+    }
+  }
 }
 async function act(action) {
   if (busy || !selected || !auth.user()) return;
@@ -493,16 +532,18 @@ async function showSuggestions() {
 }
 export async function initializeWorkspace(source) {
   intakeSource = source;
-  const downloadButton = $("#download-cases-settings");
-  if (downloadButton) {
+  document.querySelectorAll("[id^='download-cases-']").forEach((downloadButton) => {
     downloadButton.hidden = auth.user()?.role !== "admin";
     downloadButton.addEventListener("click", async () => {
       downloadButton.disabled = true;
-      try { await downloadAllCases(); notify("Todos los expedientes fueron descargados."); }
-      catch (error) { notify(error.message, true); }
+      try {
+        const format = downloadButton.id.replace("download-cases-", "");
+        await downloadAllCases(format);
+        notify(`Expedientes descargados en formato ${format === "excel" ? "Excel" : format.toUpperCase()}.`);
+      } catch (error) { notify(error.message, true); }
       finally { downloadButton.disabled = false; }
     });
-  }
+  });
   $("#open-suggestion").addEventListener("click", () => {
     $("#suggestion-form").reset();
     $("#suggestion-message").textContent = "";

@@ -428,6 +428,7 @@
                         <option>Cerrado a favor de Rematech</option>
                         <option>Cerrado con reembolso al comprador</option>
                         <option>Cerrado con reembolso parcial</option>
+                        <option>Garantía</option>
                       </select></label
                     >
                     <label id="partial-refund-field" hidden
@@ -462,13 +463,13 @@
                     >
                   </div>
                   <div class="intake-context">
-                    <label
+                    <label id="intake-type-field"
                       >Tipo de ingreso<select
                         name="intakeType"
                         id="intake-type"
                       >
                         <option>Servicio</option>
-                        <option>Cambio</option>
+                        <option value="Cambio">Cambio de equipo</option>
                         <option>Devolución</option>
                       </select></label
                     >
@@ -783,7 +784,11 @@
           <h3 id="data-tools-title">Datos de expedientes</h3>
           <p>Descarga una copia de todos los expedientes, sin importar su estado actual.</p>
         </div>
-        <button id="download-cases-settings" type="button" class="primary">↓ Descargar todos los expedientes</button>
+        <div class="settings-download-actions" role="group" aria-label="Formatos de descarga">
+          <button id="download-cases-json" type="button" class="primary">↓ JSON</button>
+          <button id="download-cases-csv" type="button" class="primary">↓ CSV</button>
+          <button id="download-cases-excel" type="button" class="primary">↓ Excel</button>
+        </div>
       </section>
       <section class="suggestions-admin" aria-labelledby="suggestions-title">
         <h3 id="suggestions-title">Propuestas de mejora</h3>

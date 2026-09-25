@@ -66,6 +66,8 @@ function updateResolutionFields() {
   const partial = draft.resolution === "Cerrado con reembolso parcial";
   const field = $("#partial-refund-field");
   if (field) field.hidden = !partial;
+  const intakeTypeField = $("#intake-type-field");
+  if (intakeTypeField) intakeTypeField.hidden = draft.resolution !== "Garantía";
   const total = intakeTotal(draft);
   draft.total = total;
   if ($("#total")) $("#total").value = total;
