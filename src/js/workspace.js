@@ -313,6 +313,8 @@ function exportRows(records) {
     correo: record.intake?.clientEmail || "",
     tipoIngreso: record.intake?.intakeType || "",
     resolucion: record.technical?.result || record.intake?.resolution || "",
+    destinoEquipo: record.destination || record.intake?.destination || "",
+    numeroRetiro: record.withdrawalNumber || record.intake?.withdrawalNumber || "",
     responsable: record.intake?.responsible || "",
     tecnico: record.technical?.technician || "",
     comentarios: record.comments?.length || 0,
