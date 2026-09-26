@@ -8,6 +8,8 @@ export const ROLES = {
 };
 export const STATUSES = {
   pendiente: "Pendiente de recepción",
+  devolucion: "En Devoluciones",
+  retiro: "En Retiros",
   reparacion: "En reparación",
   administracion: "En seguimiento con Administración",
   calidad: "Enviado a Calidad",
@@ -27,6 +29,7 @@ export const RETURN_RESOLUTIONS = [
   "Cerrado con reembolso parcial",
   "Cerrado a favor de Rematech",
 ];
+export const RETURN_DESTINATIONS = ["Regresó a Full", "Retiro creado", "Equipo en Rematech"];
 export const FAULT_LOCATIONS = [
   ...Object.keys(CATALOG),
   "Sin falla detectada",
@@ -44,6 +47,8 @@ export const goesToQuality = (result) =>
 export const PERMISSIONS = {
   dashboard: "Dashboard",
   ingresos: "Ingresos",
+  devoluciones: "Devoluciones",
+  retiros: "Retiros",
   reparacion: "Reparación",
   calidad: "Calidad",
 };
@@ -110,6 +115,8 @@ export function normalizeRecord(record) {
       : "";
   if (r.intake?.intakeType === "Devolución")
     r.intake.resolution = r.returnResolution;
+  r.destination ??= r.intake?.destination || "";
+  r.withdrawalNumber ??= r.intake?.withdrawalNumber || "";
   return r;
 }
 export function requireRole(user, role) {
@@ -153,16 +160,21 @@ export function createCase(intake, evidence, user) {
   if (errors.length) throw new Error(errors.join("\n"));
   if (evidence.length > 2) throw new Error("Solo se admiten dos evidencias.");
   const now = new Date().toISOString();
+  const routedToReturns = intake.resolution === "Garantía" && intake.intakeType === "Cambio";
   return {
     id: crypto.randomUUID(),
     folioKey: normalize(intake.folio),
     intake: {
       ...structuredClone(intake),
+      intakeType: routedToReturns ? "Devolución" : intake.intakeType,
+      destination: routedToReturns ? "" : (intake.destination || ""),
       quantity: Number(intake.quantity ?? 1),
       total: intakeTotal(intake),
     },
     evidence,
-    status: "pendiente",
+    status: routedToReturns ? "devolucion" : "pendiente",
+    destination: routedToReturns ? "" : (intake.destination || ""),
+    withdrawalNumber: "",
     revision: 1,
     createdAt: now,
     updatedAt: now,
@@ -247,8 +259,24 @@ export function applyAction(record, action, payload, user) {
     requireRole(user, "admin");
     if (!RETURN_RESOLUTIONS.includes(payload.resolution))
       throw new Error("Selecciona un estado de devolución válido.");
+    if (!RETURN_DESTINATIONS.includes(payload.destination))
+      throw new Error("Selecciona un destino válido para el equipo.");
+    if (payload.destination === "Retiro creado" && !String(payload.withdrawalNumber || "").trim())
+      throw new Error("Ingresa el número de retiro.");
     r.returnResolution = payload.resolution;
     r.intake.resolution = payload.resolution;
+    r.destination = payload.destination;
+    r.withdrawalNumber = String(payload.withdrawalNumber || "").trim();
+    r.intake.destination = r.destination;
+    r.intake.withdrawalNumber = r.withdrawalNumber;
+    if (r.destination === "Regresó a Full" || payload.resolution === "Cerrado a favor de Rematech") {
+      r.status = "finalizado";
+      r.historical = true;
+    } else if (r.destination === "Retiro creado") {
+      r.status = "retiro";
+    } else if (r.destination === "Equipo en Rematech") {
+      r.status = "pendiente";
+    }
     description = `Estado de devolución actualizado: ${payload.resolution}`;
     notify(r, user, ["admin", "ingresos"], description);
   } else if (action === "update-intake") {
@@ -270,6 +298,16 @@ export function applyAction(record, action, payload, user) {
       r.intake.resolution = String(payload.resolution || "").trim();
       if (r.intake.intakeType === "Devolución")
         r.returnResolution = r.intake.resolution || "En proceso de devolución";
+    }
+    if (payload.destination !== undefined) {
+      if (payload.destination !== "" && !RETURN_DESTINATIONS.includes(payload.destination))
+        throw new Error("Selecciona un destino válido para el equipo.");
+      r.destination = String(payload.destination || "").trim();
+      r.intake.destination = r.destination;
+    }
+    if (payload.withdrawalNumber !== undefined) {
+      r.withdrawalNumber = String(payload.withdrawalNumber || "").trim();
+      r.intake.withdrawalNumber = r.withdrawalNumber;
     }
     description = "Administrador actualizó número de serie y resolución";
     notify(r, user, ["admin", "ingresos", "reparacion"], description);
