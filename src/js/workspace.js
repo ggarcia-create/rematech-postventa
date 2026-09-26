@@ -62,8 +62,8 @@ function defaultRoute() {
       : auth.user().role === "calidad"
         ? "calidad"
         : "ingresos";
-  return [preferred, "dashboard", "ingresos", "recepciones", "calidad"].find(
-    (key) => can(auth.user(), key === "recepciones" ? "reparacion" : key),
+  return [preferred, "dashboard", "ingresos", "devoluciones", "retiros", "recepciones", "calidad"].find(
+    (key) => can(auth.user(), ["recepciones", "devoluciones", "retiros"].includes(key) ? "reparacion" : key),
   );
 }
 function requireNewPassword() {
@@ -158,7 +158,7 @@ async function signIn() {
         document.querySelectorAll("[data-route]").forEach((button) => {
           button.disabled = !can(
             user,
-            button.dataset.route === "recepciones"
+            ["recepciones", "devoluciones", "retiros"].includes(button.dataset.route)
               ? "reparacion"
               : button.dataset.route,
           );
@@ -176,7 +176,7 @@ async function signIn() {
 }
 async function navigate(next) {
   if (!auth.user()) return;
-  if (next && !can(auth.user(), next === "recepciones" ? "reparacion" : next))
+  if (next && !can(auth.user(), ["recepciones", "devoluciones", "retiros"].includes(next) ? "reparacion" : next))
     return;
   dismissNotice();
   route = next;
@@ -189,7 +189,7 @@ async function navigate(next) {
       button.setAttribute("aria-current", "page");
     else button.removeAttribute("aria-current");
   });
-  if (["recepciones", "calidad"].includes(route)) await refresh();
+  if (["recepciones", "devoluciones", "retiros", "calidad"].includes(route)) await refresh();
   if (route === "dashboard") {
     try {
       const all = await cases.list();
@@ -218,7 +218,7 @@ async function refresh() {
     records = await cases.list();
     renderLists();
   } catch (error) {
-    const target = route === "calidad" ? "#quality-list" : "#repair-list";
+    const target = route === "calidad" ? "#quality-list" : route === "devoluciones" ? "#returns-list" : route === "retiros" ? "#withdrawals-list" : "#repair-list";
     $(target).innerHTML =
       `<div class="empty-state"><p>${e(error.message)}</p></div>`;
   }
@@ -252,6 +252,17 @@ function renderList(area) {
 function renderLists() {
   renderList("repair");
   renderList("quality");
+  renderReturns();
+  renderWithdrawals();
+}
+function renderReturns() {
+  const data = records.map((record) => { try { return normalizeRecord(record); } catch { return null; } }).filter(Boolean).filter((r) => r.intake?.intakeType === "Devolución" && !r.historical && r.status !== "finalizado");
+  $("#returns-list").innerHTML = data.length ? `<div class="case-count"><span>${data.length} devolución${data.length === 1 ? "" : "es"}</span><small>Actualiza destino y número de retiro desde el expediente.</small></div><div class="case-grid">${data.map((r) => `<article class="case-card ${r.destination === "Retiro creado" ? "result-yellow" : "result-purple"}"><div class="case-card-top"><span class="case-card-kicker">DEVOLUCIÓN</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Destino</dt><dd>${e(r.destination || "Pendiente")}</dd></div><div><dt>Número de retiro</dt><dd>${e(r.withdrawalNumber || "—")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${r.comments?.length || 0} comentarios</span><button data-open-case="${e(r.id)}">Editar devolución</button></div></article>`).join("")}</div>` : `<div class="empty-state"><h2>No hay devoluciones pendientes</h2><p>Garantía con cambio de equipo aparecerá aquí.</p></div>`;
+}
+function renderWithdrawals() {
+  const data = records.map((record) => { try { return normalizeRecord(record); } catch { return null; } }).filter(Boolean).filter((r) => r.destination === "Retiro creado" && r.withdrawalNumber && !r.historical);
+  const groups = [...new Set(data.map((r) => r.withdrawalNumber))];
+  $("#withdrawals-list").innerHTML = groups.length ? `<div class="case-grid">${groups.map((number) => { const items = data.filter((r) => r.withdrawalNumber === number); return `<article class="case-card result-yellow"><div><div class="case-card-top"><span class="case-card-kicker">RETIRO</span><span class="status-badge retiro">${items.length} equipo${items.length === 1 ? "" : "s"}</span></div><h2>${e(number)}</h2><dl>${items.map((r) => `<div><dt>Expediente</dt><dd><button class="link-button" data-open-case="${e(r.id)}">${e(r.intake.folio)}</button></dd></div>`).join("")}</dl></div><div class="case-card-footer"><span class="comment-count">${items.length} expediente${items.length === 1 ? "" : "s"}</span></div></article>`; }).join("")}</div>` : `<div class="empty-state"><h2>No hay retiros creados</h2><p>Los expedientes con número de retiro aparecerán aquí.</p></div>`;
 }
 function detail() {
   clearImages();
@@ -955,7 +966,7 @@ export async function initializeWorkspace(source) {
   });
   setInterval(() => {
     if (auth.user()) {
-      if (["recepciones", "calidad"].includes(route) && !$("#case-dialog").open)
+      if (["recepciones", "devoluciones", "retiros", "calidad"].includes(route) && !$("#case-dialog").open)
         refresh();
       else refreshNotifications();
     }

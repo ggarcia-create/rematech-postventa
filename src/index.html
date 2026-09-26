@@ -207,6 +207,12 @@
               >
                 <path d="M3 7h7l2 2h9v11H3zM3 7V4h7l2 3" /></svg></span
             ><b class="nav-label">Consulta y recepciones</b></button
+          ><button data-route="devoluciones">
+            <span aria-hidden="true">↩</span
+            ><b class="nav-label">Devoluciones</b></button
+          ><button data-route="retiros">
+            <span aria-hidden="true">⌁</span
+            ><b class="nav-label">Retiros</b></button
           ><button data-route="calidad">
             <span aria-hidden="true"
               ><svg
@@ -680,6 +686,14 @@
               >
             </div>
             <div id="quality-list" class="case-list" aria-live="polite"></div>
+          </section>
+          <section id="view-devoluciones" data-view="devoluciones" class="module-view" hidden>
+            <div class="module-header"><div><div class="eyebrow">LOGÍSTICA</div><h1>Devoluciones</h1><p>Garantía con cambio de equipo y devoluciones pendientes de destino.</p></div><button class="refresh-cases">↻ Actualizar</button></div>
+            <div id="returns-list" class="case-list" aria-live="polite"></div>
+          </section>
+          <section id="view-retiros" data-view="retiros" class="module-view" hidden>
+            <div class="module-header"><div><div class="eyebrow">LOGÍSTICA</div><h1>Retiros</h1><p>Equipos agrupados por número de retiro.</p></div><button class="refresh-cases">↻ Actualizar</button></div>
+            <div id="withdrawals-list" class="case-list" aria-live="polite"></div>
           </section>
     <section id="view-settings" data-view="settings" class="module-view" hidden aria-labelledby="users-title">
       <div class="eyebrow">ADMINISTRACIÓN</div>
