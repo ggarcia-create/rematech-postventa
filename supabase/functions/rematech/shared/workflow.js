@@ -117,6 +117,19 @@ export function normalizeRecord(record) {
     r.intake.resolution = r.returnResolution;
   r.destination ??= r.intake?.destination || "";
   r.withdrawalNumber ??= r.intake?.withdrawalNumber || "";
+  // Los expedientes marcados como devolución siempre permanecen en esta bandeja,
+  // incluso si fueron creados antes del enrutamiento actual.
+  if (
+    !r.historical &&
+    r.intake?.resolution === "En proceso de devolución" &&
+    r.status !== "finalizado" &&
+    r.destination !== "Retiro creado" &&
+    r.destination !== "Regresó a Full"
+  ) {
+    r.status = "devolucion";
+    r.intake.intakeType = "Devolución";
+    r.returnResolution = "En proceso de devolución";
+  }
   return r;
 }
 export function requireRole(user, role) {
@@ -160,7 +173,9 @@ export function createCase(intake, evidence, user) {
   if (errors.length) throw new Error(errors.join("\n"));
   if (evidence.length > 2) throw new Error("Solo se admiten dos evidencias.");
   const now = new Date().toISOString();
-  const routedToReturns = intake.resolution === "Garantía" && intake.intakeType === "Cambio";
+  const routedToReturns =
+    intake.resolution === "En proceso de devolución" ||
+    (intake.resolution === "Garantía" && intake.intakeType === "Cambio");
   return {
     id: crypto.randomUUID(),
     folioKey: normalize(intake.folio),

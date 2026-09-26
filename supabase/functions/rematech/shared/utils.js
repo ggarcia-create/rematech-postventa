@@ -71,12 +71,16 @@ export function validate(draft, kind) {
     equipment: "Equipo",
     description: "Motivo específico",
     serial: "Número de serie",
+    resolution: "Resolución",
   };
   const keys = [
     "folio",
     "equipment",
     "description",
-    ...(kind === "repair" && draft.intakeType !== "Devolución"
+    "resolution",
+    ...(kind === "repair" &&
+    draft.intakeType !== "Devolución" &&
+    draft.resolution !== "En proceso de devolución"
       ? ["serial"]
       : []),
   ];
