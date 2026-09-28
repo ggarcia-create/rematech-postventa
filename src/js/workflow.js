@@ -117,6 +117,18 @@ export function normalizeRecord(record) {
     r.intake.resolution = r.returnResolution;
   r.destination ??= r.intake?.destination || "";
   r.withdrawalNumber ??= r.intake?.withdrawalNumber || "";
+  // Normalize older records before view/action checks. Some legacy changes
+  // were created as "Cambio" but now belong to the return workflow.
+  const isReturnRecord =
+    r.status === "devolucion" ||
+    RETURN_RESOLUTIONS.includes(r.intake?.resolution) ||
+    RETURN_RESOLUTIONS.includes(r.returnResolution) ||
+    RETURN_DESTINATIONS.includes(r.destination);
+  if (isReturnRecord) {
+    r.intake.intakeType = "Devolución";
+    r.returnResolution ||= r.intake.resolution || "En proceso de devolución";
+    r.intake.resolution ||= r.returnResolution;
+  }
   // Los expedientes marcados como devolución siempre permanecen en esta bandeja,
   // incluso si fueron creados antes del enrutamiento actual.
   if (

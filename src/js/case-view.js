@@ -31,15 +31,20 @@ export function caseDetailHTML(r, user, images) {
     can(user, "reparacion");
   const qualityEditable = r.status === "calidad" && can(user, "calidad");
   const q = qualityEditable ? qualityDefaults(user.name) : r.quality;
+  const isReturn =
+    r.intake?.intakeType === "Devolución" ||
+    r.status === "devolucion" ||
+    RETURN_RESOLUTIONS.includes(r.intake?.resolution) ||
+    RETURN_DESTINATIONS.includes(r.destination);
   const returnEditable =
-    r.intake?.intakeType === "Devolución" &&
+    isReturn &&
     (can(user, "admin") || can(user, "devoluciones") || can(user, "reparacion"));
   const adminIntake = can(user, "admin")
     ? `<section class="case-block admin-only"><h3>ACTUALIZAR DATOS DEL INGRESO</h3><p class="help">Solo visible para Administración. Los demás usuarios verán los datos actualizados automáticamente.</p><form id="admin-intake-form"><div class="technical-form">${field("Número de serie / SN", "serial", r.intake.serial || "")}
   <label>Resolución<select name="resolution"><option value="">Pendiente de resolución</option>${RETURN_RESOLUTIONS.map((v) => `<option ${r.intake.resolution === v || r.returnResolution === v ? "selected" : ""}>${e(v)}</option>`).join("")}</select></label></div><div class="case-actionbar"><button type="button" data-case-action="update-intake" class="primary">Guardar cambios</button></div></form></section>`
     : "";
   const returnSection =
-    r.intake?.intakeType === "Devolución"
+    isReturn
       ? `<section class="case-block return-status"><h3>EDITAR DEVOLUCIÓN</h3><p class="help">Actualiza número de serie, resolución y destino. Regresó a Full cierra el expediente; Retiro creado lo envía a Retiros; Equipo en Rematech habilita el envío a Reparación.</p><form id="return-form"><div class="technical-form"><label>Número de serie / SN<input name="serial" type="text" value="${e(r.intake.serial || "")}" maxlength="200" placeholder="Serie del equipo" ${returnEditable ? "" : "disabled"}></label><label>Resolución<select name="resolution" ${returnEditable ? "" : "disabled"}>${RETURN_RESOLUTIONS.map((value) => `<option ${r.returnResolution === value ? "selected" : ""}>${e(value)}</option>`).join("")}</select></label><label>Destino del equipo<select name="destination" ${returnEditable ? "" : "disabled"}>${RETURN_DESTINATIONS.map((value) => `<option ${r.destination === value ? "selected" : ""}>${e(value)}</option>`).join("")}</select></label><label data-return-withdrawal>Número de retiro<input name="withdrawalNumber" type="text" value="${e(r.withdrawalNumber || "")}" maxlength="200" placeholder="Ingresa el número de retiro" ${returnEditable ? "" : "disabled"}></label></div>${returnEditable ? '<div class="case-actionbar"><button type="button" data-case-action="update-return" class="primary">Guardar devolución</button></div>' : ""}</form></section>`
       : "";
   const locations = t.faultLocations || [];
