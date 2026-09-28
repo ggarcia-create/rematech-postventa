@@ -124,7 +124,8 @@ export function normalizeRecord(record) {
     r.intake?.resolution === "En proceso de devolución" &&
     r.status !== "finalizado" &&
     r.destination !== "Retiro creado" &&
-    r.destination !== "Regresó a Full"
+    r.destination !== "Regresó a Full" &&
+    r.destination !== "Equipo en Rematech"
   ) {
     r.status = "devolucion";
     r.intake.intakeType = "Devolución";
@@ -281,6 +282,11 @@ export function applyAction(record, action, payload, user) {
       throw new Error("Ingresa el número de retiro.");
     r.returnResolution = payload.resolution;
     r.intake.resolution = payload.resolution;
+    if (payload.serial !== undefined) {
+      if (typeof payload.serial !== "string" || payload.serial.trim().length > 200)
+        throw new Error("El número de serie admite hasta 200 caracteres.");
+      r.intake.serial = payload.serial.trim();
+    }
     r.destination = payload.destination;
     r.withdrawalNumber = String(payload.withdrawalNumber || "").trim();
     r.intake.destination = r.destination;
