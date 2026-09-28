@@ -17,8 +17,10 @@ jobs:
             bundles: app,dmg
     runs-on: ${{ matrix.os }}
     env:
-      VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL }}
-      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY }}
+      # Keep demo builds reproducible when repository variables are unavailable.
+      # These are the same public Supabase client values used by the demo app.
+      VITE_SUPABASE_URL: ${{ vars.SUPABASE_URL || 'https://gxhlrxiiuqlfmjrwllif.supabase.co' }}
+      VITE_SUPABASE_PUBLISHABLE_KEY: ${{ vars.SUPABASE_PUBLISHABLE_KEY || 'sb_publishable_3WJcGmNeCQYhgtr8s7qxyA_MqBP66gE' }}
       VITE_CLOUD_MODE: 'true'
       TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
       TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
