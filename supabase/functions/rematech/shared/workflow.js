@@ -115,8 +115,10 @@ export function normalizeRecord(record) {
       : "";
   if (r.intake?.intakeType === "Devolución")
     r.intake.resolution = r.returnResolution;
-  r.destination ??= r.intake?.destination || "";
-  r.withdrawalNumber ??= r.intake?.withdrawalNumber || "";
+  // Older records may keep these values nested in intake, or keep an empty
+  // root value. Treat the nested value as authoritative in both cases.
+  if (!r.destination) r.destination = r.intake?.destination || "";
+  if (!r.withdrawalNumber) r.withdrawalNumber = r.intake?.withdrawalNumber || "";
   // Normalize older records before view/action checks. Some legacy changes
   // were created as "Cambio" but now belong to the return workflow.
   const isReturnRecord =
