@@ -128,6 +128,14 @@ export function normalizeRecord(record) {
     r.intake.intakeType = "Devolución";
     r.returnResolution ||= r.intake.resolution || "En proceso de devolución";
     r.intake.resolution ||= r.returnResolution;
+    // Older deployed APIs can persist the destination while leaving the
+    // previous status in place. Destination is authoritative for tray routing.
+    if (!r.historical && r.destination === "Retiro creado") r.status = "retiro";
+    if (!r.historical && r.destination === "Equipo en Rematech") r.status = "reparacion";
+    if (r.destination === "Regresó a Full") {
+      r.status = "finalizado";
+      r.historical = true;
+    }
   }
   // Los expedientes marcados como devolución siempre permanecen en esta bandeja,
   // incluso si fueron creados antes del enrutamiento actual.

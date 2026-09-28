@@ -243,7 +243,7 @@ function renderList(area) {
       // Devoluciones and retiros have their own dedicated trays. They must
       // never leak into Consulta y recepciones, including when the filter is
       // set to Todos los estados.
-      (!["devolucion", "retiro"].includes(r.status) || r.destination === "Equipo en Rematech") &&
+      ((!["devolucion", "retiro"].includes(r.status) && !["Retiro creado", "Regresó a Full"].includes(r.destination)) || r.destination === "Equipo en Rematech") &&
       (!quality || ["calidad", "finalizado"].includes(r.status)) &&
       (!status || r.status === status) &&
       matchesCase(r, query),
@@ -732,6 +732,10 @@ export async function initializeWorkspace(source) {
     const button = event.target.closest("[data-open-case]");
     const card = event.target.closest("[data-case-card]");
     if (button || card) openCase(button?.dataset.openCase || card.dataset.caseCard);
+  });
+  $("#withdrawals-list").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-open-case]");
+    if (button) openCase(button.dataset.openCase);
   });
   $("#close-case").addEventListener("click", () => {
     if (!busy) closeCase();
