@@ -124,6 +124,9 @@ async function signIn() {
     : "current-password";
   $("#login-error").textContent = "";
   $("#login-submit").disabled = false;
+  const savedEmail = localStorage.getItem("rematech.rememberedEmail") || "";
+  $("#login-email").value = savedEmail;
+  $("#remember-email").checked = Boolean(savedEmail);
   await new Promise((resolve) => {
     $("#login-form").onsubmit = async (event) => {
       event.preventDefault();
@@ -147,6 +150,9 @@ async function signIn() {
           );
           if (account.mustChangePassword) await requireNewPassword();
         }
+        if ($("#remember-email").checked)
+          localStorage.setItem("rematech.rememberedEmail", $("#login-email").value.trim());
+        else localStorage.removeItem("rematech.rememberedEmail");
         $("#login-password").value = "";
         $("#login-error").textContent = "";
         $("#login-screen").hidden = true;
