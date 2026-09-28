@@ -133,7 +133,25 @@ export const cloudCases = {
     });
   },
   async act(id, revision, operation, payload) {
-    await cloudCall("act", { id, revision, operation, payload });
+    try {
+      await cloudCall("act", { id, revision, operation, payload });
+    } catch (error) {
+      // Compatibility with an older deployed function: legacy return records
+      // may still say "Servicio" and be rejected by update-return. Persist
+      // their editable return fields through the older admin update operation.
+      if (operation !== "update-return") throw error;
+      await cloudCall("act", {
+        id,
+        revision,
+        operation: "update-intake",
+        payload: {
+          serial: payload.serial,
+          resolution: payload.resolution,
+          destination: payload.destination,
+          withdrawalNumber: payload.withdrawalNumber,
+        },
+      });
+    }
     return getCase(id);
   },
   notifications: () => cloudCall("notifications"),

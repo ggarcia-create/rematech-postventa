@@ -50,6 +50,20 @@
 .login-panel form {
   width: 340px;
 }
+.remember-email {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  width: max-content;
+  max-width: 100%;
+}
+.remember-email input {
+  width: auto !important;
+  flex: 0 0 auto;
+  margin: 0;
+}
 .login-panel h2 {
   font-size: 29px;
   letter-spacing: -0.8px;
