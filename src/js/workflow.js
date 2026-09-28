@@ -271,7 +271,7 @@ export function applyAction(record, action, payload, user) {
   if (action === "update-return") {
     if (r.intake?.intakeType !== "Devolución")
       throw new Error("Este expediente no es una devolución.");
-    if (!can(user, "admin") && !can(user, "devoluciones"))
+    if (!can(user, "admin") && !can(user, "devoluciones") && !can(user, "reparacion"))
       throw new Error("No tienes permisos para editar devoluciones.");
     if (!RETURN_RESOLUTIONS.includes(payload.resolution))
       throw new Error("Selecciona un estado de devolución válido.");

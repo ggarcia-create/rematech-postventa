@@ -257,7 +257,7 @@ function renderLists() {
 }
 function renderReturns() {
   const query = $("#returns-search")?.value || "";
-  const canEdit = can(auth.user(), "admin") || can(auth.user(), "devoluciones");
+  const canEdit = can(auth.user(), "admin") || can(auth.user(), "devoluciones") || can(auth.user(), "reparacion");
   const data = records
     .map((record) => { try { return normalizeRecord(record); } catch { return null; } })
     .filter(Boolean)
