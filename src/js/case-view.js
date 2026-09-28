@@ -87,7 +87,7 @@ export function caseDetailHTML(r, user, images) {
     )
     .join(
       "",
-    )}</div>${images.some(Boolean) ? `<div class="case-evidence">${images.map((url, i) => (url ? `<img src="${url}" alt="Evidencia ${i + 1}">` : "")).join("")}</div>` : ""}</section>${r.status === "pendiente" ? '<p class="readonly-note">Confirma la recepción física para habilitar la información técnica.</p>' : tech}${quality}${reviews}${comments}<section class="case-block"><h3>HISTORIAL DEL EXPEDIENTE</h3><ol class="case-history">${r.history.map((h) => `<li>${e(h.action)}<small>${e(h.actor)} · ${ROLES[h.role] || e(h.role)} · ${e(stamp(h.at))}</small></li>`).join("")}</ol></section>`;
+    )}</div>${images.some(Boolean) ? `<div class="case-evidence" aria-label="Evidencias adjuntas">${images.map((url, i) => (url ? `<button type="button" class="evidence-preview" data-evidence-index="${i}" aria-label="Ampliar evidencia ${i + 1}"><img src="${url}" alt="Evidencia ${i + 1}"></button>` : "")).join("")}</div>` : ""}</section>${r.status === "pendiente" ? '<p class="readonly-note">Confirma la recepción física para habilitar la información técnica.</p>' : tech}${quality}${reviews}${comments}<section class="case-block"><h3>HISTORIAL DEL EXPEDIENTE</h3><ol class="case-history">${r.history.map((h) => `<li>${e(h.action)}<small>${e(h.actor)} · ${ROLES[h.role] || e(h.role)} · ${e(stamp(h.at))}</small></li>`).join("")}</ol></section>`;
 }
 export function updateCaseControls(root) {
   const returnForm = root.querySelector("#return-form");

@@ -22,6 +22,7 @@ let route = "ingresos",
   records = [],
   selected = null,
   caseImages = [],
+  evidenceIndex = 0,
   intakeSource,
   busy = false;
 const stamp = (value) => {
@@ -49,8 +50,43 @@ const errorText = (id, error) => {
 function clearImages() {
   caseImages.forEach((url) => url && URL.revokeObjectURL(url));
   caseImages = [];
+  evidenceIndex = 0;
+  const image = $("#evidence-lightbox-image");
+  if (image) image.removeAttribute("src");
+}
+function evidenceIndexes() {
+  return caseImages.map((url, index) => (url ? index : null)).filter((index) => index !== null);
+}
+function showEvidence(index) {
+  const indexes = evidenceIndexes();
+  const dialog = $("#evidence-lightbox");
+  const image = $("#evidence-lightbox-image");
+  if (!indexes.length || !dialog || !image) return;
+  const position = Math.max(0, indexes.indexOf(index));
+  evidenceIndex = indexes[position];
+  image.src = caseImages[evidenceIndex];
+  image.alt = `Evidencia ${evidenceIndex + 1}`;
+  $("#evidence-lightbox-title").textContent = `Evidencia ${evidenceIndex + 1}`;
+  $("#evidence-lightbox-caption").textContent = `Evidencia ${position + 1} de ${indexes.length}`;
+  $("#evidence-prev").hidden = indexes.length < 2;
+  $("#evidence-next").hidden = indexes.length < 2;
+  if (!dialog.open) dialog.showModal();
+}
+function moveEvidence(delta) {
+  const indexes = evidenceIndexes();
+  if (indexes.length < 2) return;
+  const current = indexes.indexOf(evidenceIndex);
+  const next = (current + delta + indexes.length) % indexes.length;
+  showEvidence(indexes[next]);
+}
+function closeEvidenceViewer() {
+  const dialog = $("#evidence-lightbox");
+  if (dialog?.open) dialog.close();
+  const image = $("#evidence-lightbox-image");
+  if (image) image.removeAttribute("src");
 }
 function closeCase() {
+  closeEvidenceViewer();
   $("#case-dialog").close();
   clearImages();
   selected = null;
@@ -284,6 +320,7 @@ function renderWithdrawals() {
 }
 function detail() {
   clearImages();
+  evidenceIndex = 0;
   caseImages = selected.evidence.map((blob) =>
     blob ? URL.createObjectURL(blob) : null,
   );
@@ -748,8 +785,31 @@ export async function initializeWorkspace(source) {
     }
   });
   $("#case-detail").addEventListener("click", (event) => {
+    const evidence = event.target.closest("[data-evidence-index]");
+    if (evidence) {
+      event.preventDefault();
+      event.stopPropagation();
+      showEvidence(Number(evidence.dataset.evidenceIndex));
+      return;
+    }
     const button = event.target.closest("[data-case-action]");
     if (button) act(button.dataset.caseAction);
+  });
+  $("#close-evidence-lightbox").addEventListener("click", closeEvidenceViewer);
+  $("#evidence-prev").addEventListener("click", () => moveEvidence(-1));
+  $("#evidence-next").addEventListener("click", () => moveEvidence(1));
+  $("#evidence-lightbox").addEventListener("cancel", (event) => {
+    event.preventDefault();
+    closeEvidenceViewer();
+  });
+  $("#evidence-lightbox").addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) closeEvidenceViewer();
+  });
+  document.addEventListener("keydown", (event) => {
+    if (!$("#evidence-lightbox")?.open) return;
+    if (event.key === "ArrowLeft") moveEvidence(-1);
+    if (event.key === "ArrowRight") moveEvidence(1);
+    if (event.key === "Escape") closeEvidenceViewer();
   });
   $("#case-comments-count").addEventListener("click", () => {
     const section = $("#case-detail .case-comments-section");

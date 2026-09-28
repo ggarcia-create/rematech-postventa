@@ -397,12 +397,98 @@
   gap: 12px;
   margin-top: 15px;
 }
+.case-evidence .evidence-preview {
+  min-width: 0;
+  width: 45%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+.case-evidence .evidence-preview:focus-visible {
+  outline: 3px solid var(--accent, #16d6a0);
+  outline-offset: 3px;
+  border-radius: 8px;
+}
 .case-evidence img {
   width: 45%;
   height: 150px;
   object-fit: contain;
   border: 1px solid #dfe8e2;
   border-radius: 5px;
+}
+.case-evidence .evidence-preview img {
+  width: 100%;
+}
+.evidence-lightbox {
+  width: min(96vw, 1400px);
+  height: min(94vh, 1000px);
+  max-width: none;
+  max-height: none;
+  padding: 20px;
+  border: 0;
+  border-radius: 20px;
+  background: #0b1220;
+  color: #fff;
+  box-shadow: 0 28px 100px #0008;
+}
+.evidence-lightbox::backdrop {
+  background: rgb(3 8 20 / 86%);
+}
+.evidence-lightbox-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.evidence-lightbox-head h2 {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+}
+.evidence-lightbox-head button,
+.evidence-lightbox-stage > button {
+  border: 1px solid rgb(255 255 255 / 30%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 12%);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+.evidence-lightbox-head button {
+  padding: 8px 14px;
+}
+.evidence-lightbox-stage {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  height: calc(100% - 74px);
+  min-height: 0;
+  margin-top: 10px;
+}
+.evidence-lightbox-stage img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  image-rendering: auto;
+  justify-self: center;
+}
+.evidence-lightbox-stage > button {
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font-size: 32px;
+  line-height: 1;
+}
+.evidence-lightbox-caption {
+  margin: 8px 0 0;
+  color: rgb(255 255 255 / 72%);
+  font-size: 12px;
+  text-align: center;
 }
 .technical-form {
   display: grid;

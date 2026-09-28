@@ -881,6 +881,18 @@
       <div id="case-detail"></div>
       <p id="case-message" role="status" aria-live="polite"></p>
     </dialog>
+    <dialog id="evidence-lightbox" class="evidence-lightbox" aria-labelledby="evidence-lightbox-title">
+      <div class="evidence-lightbox-head">
+        <h2 id="evidence-lightbox-title">Evidencia</h2>
+        <button id="close-evidence-lightbox" type="button" aria-label="Cerrar evidencia">Cerrar</button>
+      </div>
+      <div class="evidence-lightbox-stage">
+        <button id="evidence-prev" type="button" aria-label="Evidencia anterior">‹</button>
+        <img id="evidence-lightbox-image" alt="" />
+        <button id="evidence-next" type="button" aria-label="Siguiente evidencia">›</button>
+      </div>
+      <p id="evidence-lightbox-caption"></p>
+    </dialog>
     <dialog id="suggestion-dialog" aria-labelledby="suggestion-title">
       <form id="suggestion-form">
         <div class="eyebrow">IDEAS DEL EQUIPO</div>
