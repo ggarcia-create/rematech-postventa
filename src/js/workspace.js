@@ -256,8 +256,16 @@ function renderLists() {
   renderWithdrawals();
 }
 function renderReturns() {
-  const data = records.map((record) => { try { return normalizeRecord(record); } catch { return null; } }).filter(Boolean).filter((r) => r.intake?.intakeType === "Devolución" && !r.historical && r.status !== "finalizado");
-  $("#returns-list").innerHTML = data.length ? `<div class="case-count"><span>${data.length} devolución${data.length === 1 ? "" : "es"}</span><small>Actualiza destino y número de retiro desde el expediente.</small></div><div class="case-grid">${data.map((r) => `<article class="case-card ${r.destination === "Retiro creado" ? "result-yellow" : "result-purple"}"><div class="case-card-top"><span class="case-card-kicker">DEVOLUCIÓN</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Destino</dt><dd>${e(r.destination || "Pendiente")}</dd></div><div><dt>Número de retiro</dt><dd>${e(r.withdrawalNumber || "—")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${r.comments?.length || 0} comentarios</span><button data-open-case="${e(r.id)}">Editar devolución</button></div></article>`).join("")}</div>` : `<div class="empty-state"><h2>No hay devoluciones pendientes</h2><p>Garantía con cambio de equipo aparecerá aquí.</p></div>`;
+  const query = $("#returns-search")?.value || "";
+  const canEdit = can(auth.user(), "admin") || can(auth.user(), "devoluciones");
+  const data = records
+    .map((record) => { try { return normalizeRecord(record); } catch { return null; } })
+    .filter(Boolean)
+    .filter((r) => r.intake?.intakeType === "Devolución" && !r.historical && r.status !== "finalizado")
+    .filter((r) => matchesCase(r, query));
+  $("#returns-list").innerHTML = data.length
+    ? `<div class="case-count"><span>${data.length} devolución${data.length === 1 ? "" : "es"}</span><small>Actualiza destino y número de retiro desde el expediente.</small></div><div class="case-grid">${data.map((r) => `<article class="case-card ${r.destination === "Retiro creado" ? "result-yellow" : "result-purple"}" data-case-card="${e(r.id)}"><div class="case-card-top"><span class="case-card-kicker">DEVOLUCIÓN</span>${badge(r.status)}</div><h2>${e(r.intake.folio)}</h2><p class="case-card-client">${e(r.intake.client || "Cliente sin nombre")}</p><dl><div><dt>Equipo</dt><dd>${e(r.intake.equipment || "—")}</dd></div><div><dt>Destino</dt><dd>${e(r.destination || "Pendiente")}</dd></div><div><dt>Número de retiro</dt><dd>${e(r.withdrawalNumber || "—")}</dd></div></dl><div class="case-card-footer"><span class="comment-count">▱ ${r.comments?.length || 0} comentarios</span><button data-open-case="${e(r.id)}">${canEdit ? "Editar devolución" : "Ver expediente"}</button></div></article>`).join("")}</div>`
+    : `<div class="empty-state"><h2>${query ? "Sin coincidencias" : "No hay devoluciones pendientes"}</h2><p>${query ? "Prueba con el folio, número de pedido o número de serie." : "Garantía con cambio de equipo aparecerá aquí."}</p></div>`;
 }
 function renderWithdrawals() {
   const data = records.map((record) => { try { return normalizeRecord(record); } catch { return null; } }).filter(Boolean).filter((r) => r.destination === "Retiro creado" && r.withdrawalNumber && !r.historical);
@@ -709,6 +717,12 @@ export async function initializeWorkspace(source) {
         openCase(button?.dataset.openCase || card.dataset.caseCard);
     });
   }
+  $("#returns-search").addEventListener("input", () => renderReturns());
+  $("#returns-list").addEventListener("click", (event) => {
+    const button = event.target.closest("[data-open-case]");
+    const card = event.target.closest("[data-case-card]");
+    if (button || card) openCase(button?.dataset.openCase || card.dataset.caseCard);
+  });
   $("#close-case").addEventListener("click", () => {
     if (!busy) closeCase();
   });
