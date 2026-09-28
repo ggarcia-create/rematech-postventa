@@ -39,7 +39,7 @@ export function caseDetailHTML(r, user, images) {
   const returnEditable =
     isReturn &&
     (can(user, "admin") || can(user, "devoluciones") || can(user, "reparacion"));
-  const adminIntake = can(user, "admin")
+  const adminIntake = can(user, "admin") && !isReturn
     ? `<section class="case-block admin-only"><h3>ACTUALIZAR DATOS DEL INGRESO</h3><p class="help">Solo visible para Administración. Los demás usuarios verán los datos actualizados automáticamente.</p><form id="admin-intake-form"><div class="technical-form">${field("Número de serie / SN", "serial", r.intake.serial || "")}
   <label>Resolución<select name="resolution"><option value="">Pendiente de resolución</option>${RETURN_RESOLUTIONS.map((v) => `<option ${r.intake.resolution === v || r.returnResolution === v ? "selected" : ""}>${e(v)}</option>`).join("")}</select></label></div><div class="case-actionbar"><button type="button" data-case-action="update-intake" class="primary">Guardar cambios</button></div></form></section>`
     : "";
