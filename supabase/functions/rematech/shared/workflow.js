@@ -309,7 +309,9 @@ export function applyAction(record, action, payload, user) {
     } else if (r.destination === "Retiro creado") {
       r.status = "retiro";
     } else if (r.destination === "Equipo en Rematech") {
-      r.status = "pendiente";
+      // Once the unit is physically in Rematech it belongs to Reparación,
+      // even though the return metadata remains available for reference.
+      r.status = "reparacion";
     }
     description = `Estado de devolución actualizado: ${payload.resolution}`;
     notify(r, user, ["admin", "ingresos"], description);

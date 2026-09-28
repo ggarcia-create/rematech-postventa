@@ -234,6 +234,10 @@ function renderList(area) {
     .filter(Boolean);
   const data = safeRecords.filter(
     (r) =>
+      // Devoluciones and retiros have their own dedicated trays. They must
+      // never leak into Consulta y recepciones, including when the filter is
+      // set to Todos los estados.
+      !["devolucion", "retiro"].includes(r.status) &&
       (!quality || ["calidad", "finalizado"].includes(r.status)) &&
       (!status || r.status === status) &&
       matchesCase(r, query),
