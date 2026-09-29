@@ -109,6 +109,8 @@ export function normalizeRecord(record) {
   r.comments ??= [];
   r.notifications ??= [];
   r.qualityReviews ??= [];
+  // Los expedientes finalizados salen de las bandejas operativas y quedan en históricos.
+  if (r.status === "finalizado") r.historical = true;
   r.returnResolution ??=
     r.intake?.intakeType === "Devolución"
       ? r.intake.resolution || "En proceso de devolución"
@@ -441,6 +443,7 @@ export function applyAction(record, action, payload, user) {
           "Este resultado no puede aprobarse en Calidad. Devuelve el equipo a Reparación con observaciones.",
         );
       r.status = "finalizado";
+      r.historical = true;
       description = "Inspección de Calidad aprobada · proceso finalizado";
     } else {
       if (q.decision !== "rejected")
