@@ -279,8 +279,10 @@ function renderList(area) {
       // Devoluciones and retiros have their own dedicated trays. They must
       // never leak into Consulta y recepciones, including when the filter is
       // set to Todos los estados.
-      ((!["devolucion", "retiro"].includes(r.status) && !["Retiro creado", "Regresó a Full"].includes(r.destination)) || r.destination === "Equipo en Rematech") &&
-      (!quality || ["calidad", "finalizado"].includes(r.status)) &&
+      !r.historical &&
+      (quality
+        ? r.status === "calidad"
+        : ["pendiente", "reparacion", "administracion"].includes(r.status)) &&
       (!status || r.status === status) &&
       matchesCase(r, query),
   );
